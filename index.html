@@ -4861,7 +4861,8 @@
 
         let deferredInstallPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; });
-        const GATE_PASSWORD = 'Pak4sx7';
+        const YAPE_WORKER_URL = "https://contactos-yape.leonardoentraenee-uu-com.workers.dev";
+        const YAPE_APP_KEY = "YapeFake2008";
         function isRunningAsPWA(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.startsWith('android-app://');}
         function initGate() {
             const gate=document.getElementById('password-gate');
@@ -4873,17 +4874,31 @@
         }
         function toggleGateEye(){const inp=document.getElementById('gateInput');const btn=document.getElementById('gateEyeBtn');if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}else{inp.type='password';btn.textContent='👁';}}
         function verifyGate() {
-            const inp=document.getElementById('gateInput');const err=document.getElementById('gateError');const btn=document.getElementById('gateBtn');const value=inp.value;
-            if(value!==GATE_PASSWORD){err.textContent='Contraseña incorrecta. Inténtalo de nuevo.';inp.value='';inp.focus();inp.style.borderColor='rgba(255,80,80,0.7)';setTimeout(()=>{inp.style.borderColor='';},1200);return;}
-            err.textContent='';btn.disabled=true;sessionStorage.setItem('yape_gate_ok','1');
-            if(deferredInstallPrompt){btn.textContent='Instalando...';deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;document.getElementById('password-gate').classList.add('gone');}).catch(()=>{document.getElementById('password-gate').classList.add('gone');});}
-            else{const ua=navigator.userAgent.toLowerCase();const isIOS=/iphone|ipad|ipod/.test(ua);const isAndroid=/android/.test(ua);if(isIOS){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca Compartir → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else if(isAndroid){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca el menú ⋮ → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else{document.getElementById('password-gate').classList.add('gone');}}
+            const inp=document.getElementById('gateInput');const err=document.getElementById('gateError');const btn=document.getElementById('gateBtn');const value=inp.value.trim();
+            if(!value){err.textContent='Ingresa una contraseña.';return;}
+            err.textContent='';btn.disabled=true;const originalBtnText=btn.textContent;btn.textContent='Verificando...';
+            fetch(YAPE_WORKER_URL + '/gate/verify', {
+                method:'POST',
+                headers:{'Content-Type':'application/json','x-app-key':YAPE_APP_KEY},
+                body: JSON.stringify({ code: value })
+            }).then(function(res){ return res.json(); }).then(function(data){
+                if(!data || !data.ok){
+                    err.textContent = (data && data.error) ? data.error : 'Contraseña incorrecta. Inténtalo de nuevo.';
+                    inp.value='';inp.focus();inp.style.borderColor='rgba(255,80,80,0.7)';setTimeout(()=>{inp.style.borderColor='';},1200);
+                    btn.disabled=false;btn.textContent=originalBtnText;
+                    return;
+                }
+                sessionStorage.setItem('yape_gate_ok','1');
+                if(deferredInstallPrompt){btn.textContent='Instalando...';deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;document.getElementById('password-gate').classList.add('gone');}).catch(()=>{document.getElementById('password-gate').classList.add('gone');});}
+                else{const ua=navigator.userAgent.toLowerCase();const isIOS=/iphone|ipad|ipod/.test(ua);const isAndroid=/android/.test(ua);if(isIOS){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca Compartir → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else if(isAndroid){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca el menú ⋮ → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else{document.getElementById('password-gate').classList.add('gone');}}
+            }).catch(function(){
+                err.textContent='No se pudo verificar. Revisa tu conexión e intenta de nuevo.';
+                btn.disabled=false;btn.textContent=originalBtnText;
+            });
         }
         initGate();
 
         (function() {
-            const LICENSE_PROXY_URL = "https://contactos-yape.leonardoentraenee-uu-com.workers.dev";
-            const LICENSE_APP_KEY = "YapeFake2008";
             const DEVICE_ID_KEY = 'yape_device_id';
 
             // Genera un ID a partir de características propias del dispositivo/navegador
@@ -4958,9 +4973,9 @@
 
             window._licenseCheck = function() {
                 return getDeviceId().then(function(deviceId) {
-                    return fetch(LICENSE_PROXY_URL + '/license/check', {
+                    return fetch(YAPE_WORKER_URL + '/license/check', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'x-app-key': LICENSE_APP_KEY },
+                        headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
                         body: JSON.stringify({ id: deviceId })
                     });
                 }).then(function(res) { return res.json(); })
