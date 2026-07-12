@@ -4889,17 +4889,10 @@
             // Genera un ID a partir de características propias del dispositivo/navegador
             // (no de algo guardado al azar), para que sea el mismo aunque se borre
             // el almacenamiento o se desinstale y reinstale la app.
+            // Nota: no se usa "canvas fingerprint" porque varios navegadores le
+            // agregan ruido al azar en cada carga como protección de privacidad,
+            // lo que generaba un ID distinto cada vez que se entraba a la página.
             async function computeDeviceFingerprint() {
-                let canvasFp = '';
-                try {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    ctx.textBaseline = 'top';
-                    ctx.font = '14px Arial';
-                    ctx.fillText('yape-device-fp', 2, 2);
-                    canvasFp = canvas.toDataURL();
-                } catch (e) {}
-
                 const parts = [
                     navigator.userAgent || '',
                     navigator.platform || '',
@@ -4907,8 +4900,7 @@
                     String(navigator.hardwareConcurrency || ''),
                     String(navigator.deviceMemory || ''),
                     String(screen.width) + 'x' + String(screen.height) + 'x' + String(screen.colorDepth),
-                    Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-                    canvasFp
+                    Intl.DateTimeFormat().resolvedOptions().timeZone || ''
                 ].join('###');
 
                 if (window.crypto && crypto.subtle) {
@@ -4928,10 +4920,17 @@
             let deviceIdPromise = null;
             function getDeviceId() {
                 if (!deviceIdPromise) {
-                    deviceIdPromise = computeDeviceFingerprint().then(function(id) {
-                        localStorage.setItem(DEVICE_ID_KEY, id);
-                        return id;
-                    });
+                    // Si ya hay un ID calculado guardado, se reusa tal cual (más rápido
+                    // y evita cualquier variación); si no existe, se calcula de nuevo.
+                    const cached = localStorage.getItem(DEVICE_ID_KEY);
+                    if (cached) {
+                        deviceIdPromise = Promise.resolve(cached);
+                    } else {
+                        deviceIdPromise = computeDeviceFingerprint().then(function(id) {
+                            localStorage.setItem(DEVICE_ID_KEY, id);
+                            return id;
+                        });
+                    }
                 }
                 return deviceIdPromise;
             }
