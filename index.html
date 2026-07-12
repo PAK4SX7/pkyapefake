@@ -3554,7 +3554,7 @@
     <!-- DELETE HISTORY MODAL -->
     <div class="delete-history-overlay" id="deleteHistoryModal"><div class="delete-history-modal"><div class="delete-history-title">Borrar historial</div><div class="delete-history-subtitle">¿Deseas borrar este historial?</div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-cancel" onclick="closeDeleteHistory()">Cancelar</button><button class="delete-history-btn delete-history-confirm" onclick="confirmDeleteHistory()">Borrar</button></div></div></div>
     <div class="delete-history-overlay" id="deleteContactModal"><div class="delete-history-modal"><div class="delete-history-title">Eliminar contacto</div><div class="delete-history-subtitle" id="deleteContactSubtitle">¿Deseas eliminar este contacto?</div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-cancel" onclick="closeDeleteContact()">Cancelar</button><button class="delete-history-btn delete-history-confirm" onclick="confirmDeleteContact()">Eliminar</button></div></div></div>
-    <div class="delete-history-overlay" id="licenseTimeModal"><div class="delete-history-modal"><div class="delete-history-title">Tiempo de uso</div><div class="delete-history-subtitle" id="licenseTimeSubtitle">Calculando...</div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-confirm" style="width:100%;" onclick="closeLicenseTime()">Entendido</button></div></div></div>
+    <div class="delete-history-overlay" id="licenseTimeModal"><div class="delete-history-modal"><div class="delete-history-title">Tiempo de uso</div><div class="delete-history-subtitle" id="licenseTimeSubtitle">Calculando...</div><div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,0,0,0.08);"><div style="font-size:12px;font-weight:600;opacity:0.7;margin-bottom:6px;">Tu ID</div><div style="display:flex;align-items:center;gap:8px;"><div id="licenseUserIdText" style="flex:1;font-size:12px;font-family:monospace;word-break:break-all;background:rgba(0,0,0,0.05);padding:8px 10px;border-radius:8px;">Cargando...</div><button type="button" id="copyUserIdBtn" class="delete-history-btn delete-history-confirm" style="white-space:nowrap;padding:8px 14px;" onclick="copyUserId()">Copiar</button></div></div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-confirm" style="width:100%;" onclick="closeLicenseTime()">Entendido</button></div></div></div>
 
     <!-- ALL MOVEMENTS SCREEN -->
     <div id="screen-all-movements"><div class="all-movements-header"><button class="all-movements-back" onclick="closeAllMovements()">‹</button><span>Movimientos</span><div style="width:36px;"></div></div><div class="all-movements-list" id="all-movements-list"></div></div>
@@ -4971,6 +4971,8 @@
                 document.body.appendChild(overlay);
             }
 
+            window._getDeviceId = getDeviceId;
+
             window._licenseCheck = function() {
                 return getDeviceId().then(function(deviceId) {
                     return fetch(YAPE_WORKER_URL + '/license/check', {
@@ -4998,6 +5000,20 @@
             modal.classList.add('active');
             sub.textContent = 'Calculando...';
 
+            const idText = document.getElementById('licenseUserIdText');
+            if (idText) {
+                idText.textContent = 'Cargando...';
+                if (window._getDeviceId) {
+                    window._getDeviceId().then(function(id) {
+                        idText.textContent = id;
+                    }).catch(function() {
+                        idText.textContent = 'No disponible';
+                    });
+                } else {
+                    idText.textContent = 'No disponible';
+                }
+            }
+
             function renderCountdown() {
                 if (!window._licenseExpiresAt) { sub.textContent = 'No se pudo obtener tu tiempo restante.'; return; }
                 const diff = new Date(window._licenseExpiresAt).getTime() - Date.now();
@@ -5024,6 +5040,42 @@
         function closeLicenseTime() {
             document.getElementById('licenseTimeModal').classList.remove('active');
             clearInterval(licenseTimeInterval);
+        }
+
+        function copyUserId() {
+            const idText = document.getElementById('licenseUserIdText');
+            const btn = document.getElementById('copyUserIdBtn');
+            if (!idText) return;
+            const value = idText.textContent.trim();
+            if (!value || value === 'Cargando...' || value === 'No disponible') return;
+
+            function showCopied() {
+                if (!btn) return;
+                const original = btn.textContent;
+                btn.textContent = 'Copiado';
+                setTimeout(function() { btn.textContent = original; }, 1500);
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(value).then(showCopied).catch(function() {
+                    fallbackCopy(value, showCopied);
+                });
+            } else {
+                fallbackCopy(value, showCopied);
+            }
+        }
+
+        function fallbackCopy(text, onDone) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            temp.style.position = 'fixed';
+            temp.style.opacity = '0';
+            document.body.appendChild(temp);
+            temp.focus();
+            temp.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(temp);
+            if (onDone) onDone();
         }
     </script>
 </body>
