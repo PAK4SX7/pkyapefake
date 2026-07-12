@@ -2216,10 +2216,6 @@
             text-align: center;
             color: #fff;
         }
-        .license-block-icon {
-            font-size: 46px;
-            margin-bottom: 18px;
-        }
         .license-block-title {
             font-size: 20px;
             font-weight: 800;
@@ -4890,16 +4886,54 @@
             const LICENSE_APP_KEY = "YapeFake2008";
             const DEVICE_ID_KEY = 'yape_device_id';
 
-            function getDeviceId() {
-                let id = localStorage.getItem(DEVICE_ID_KEY);
-                if (!id) {
-                    id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
-                    localStorage.setItem(DEVICE_ID_KEY, id);
+            // Genera un ID a partir de características propias del dispositivo/navegador
+            // (no de algo guardado al azar), para que sea el mismo aunque se borre
+            // el almacenamiento o se desinstale y reinstale la app.
+            async function computeDeviceFingerprint() {
+                let canvasFp = '';
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    ctx.textBaseline = 'top';
+                    ctx.font = '14px Arial';
+                    ctx.fillText('yape-device-fp', 2, 2);
+                    canvasFp = canvas.toDataURL();
+                } catch (e) {}
+
+                const parts = [
+                    navigator.userAgent || '',
+                    navigator.platform || '',
+                    navigator.language || '',
+                    String(navigator.hardwareConcurrency || ''),
+                    String(navigator.deviceMemory || ''),
+                    String(screen.width) + 'x' + String(screen.height) + 'x' + String(screen.colorDepth),
+                    Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+                    canvasFp
+                ].join('###');
+
+                if (window.crypto && crypto.subtle) {
+                    try {
+                        const enc = new TextEncoder().encode(parts);
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+                    } catch (e) {}
                 }
-                return id;
+                // Respaldo simple si SubtleCrypto no está disponible
+                let h = 0;
+                for (let i = 0; i < parts.length; i++) { h = ((h << 5) - h + parts.charCodeAt(i)) | 0; }
+                return 'fp-' + Math.abs(h).toString(16);
+            }
+
+            let deviceIdPromise = null;
+            function getDeviceId() {
+                if (!deviceIdPromise) {
+                    deviceIdPromise = computeDeviceFingerprint().then(function(id) {
+                        localStorage.setItem(DEVICE_ID_KEY, id);
+                        return id;
+                    });
+                }
+                return deviceIdPromise;
             }
 
             function showLicenseBlockedScreen() {
@@ -4907,22 +4941,33 @@
                 const overlay = document.createElement('div');
                 overlay.id = 'licenseBlockOverlay';
                 overlay.innerHTML = '<div class="license-block-box">' +
-                    '<div class="license-block-icon">⏳</div>' +
                     '<div class="license-block-title">Tu acceso terminó</div>' +
                     '<div class="license-block-text">Necesitas días de uso activos para seguir usando la app. Contacta al administrador para renovar tu acceso. Telegram: @paka4sx7</div>' +
                     '</div>';
                 document.body.appendChild(overlay);
             }
 
+            function showNotFoundScreen() {
+                if (document.getElementById('notFoundOverlay')) return;
+                document.body.innerHTML = '';
+                const overlay = document.createElement('div');
+                overlay.id = 'notFoundOverlay';
+                overlay.style.cssText = 'position:fixed;inset:0;background:#fff;color:#222;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:center;padding:30px;';
+                overlay.innerHTML = '<div><div style="font-size:22px;font-weight:700;margin-bottom:10px;">404</div><div style="font-size:15px;color:#555;">Esta página no está disponible.</div></div>';
+                document.body.appendChild(overlay);
+            }
+
             window._licenseCheck = function() {
-                const deviceId = getDeviceId();
-                return fetch(LICENSE_PROXY_URL + '/license/check', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-app-key': LICENSE_APP_KEY },
-                    body: JSON.stringify({ id: deviceId })
+                return getDeviceId().then(function(deviceId) {
+                    return fetch(LICENSE_PROXY_URL + '/license/check', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-app-key': LICENSE_APP_KEY },
+                        body: JSON.stringify({ id: deviceId })
+                    });
                 }).then(function(res) { return res.json(); })
                   .then(function(data) {
                       window._licenseExpiresAt = data.expiresAt || null;
+                      if (data.userBlocked) { showNotFoundScreen(); return data; }
                       if (data.blocked) showLicenseBlockedScreen();
                       return data;
                   })
