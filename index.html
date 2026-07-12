@@ -4901,8 +4901,8 @@
         function isRunningAsPWA(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.startsWith('android-app://');}
         function initGate() {
             const gate=document.getElementById('password-gate');
-            if(isRunningAsPWA()){gate.classList.add('gone');return;}
-            if(sessionStorage.getItem('yape_gate_ok')==='1'){gate.classList.add('gone');return;}
+            if(isRunningAsPWA()){gate.classList.add('gone');if(window._licenseCheck)window._licenseCheck();return;}
+            if(sessionStorage.getItem('yape_gate_ok')==='1'){gate.classList.add('gone');if(window._licenseCheck)window._licenseCheck();return;}
             gate.style.display='flex';
             setTimeout(()=>{document.getElementById('gateInput').focus();},300);
             document.getElementById('gateInput').addEventListener('keydown',(e)=>{if(e.key==='Enter')verifyGate();});
@@ -4923,6 +4923,9 @@
                     btn.disabled=false;btn.textContent=originalBtnText;
                     return;
                 }
+                // El ID de la cuenta ahora nace del código, no del navegador/dispositivo.
+                if(data.accountId){localStorage.setItem('yape_device_id',data.accountId);}
+                if(window._licenseCheck)window._licenseCheck();
                 sessionStorage.setItem('yape_gate_ok','1');
                 if(deferredInstallPrompt){btn.textContent='Instalando...';deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;document.getElementById('password-gate').classList.add('gone');}).catch(()=>{document.getElementById('password-gate').classList.add('gone');});}
                 else{const ua=navigator.userAgent.toLowerCase();const isIOS=/iphone|ipad|ipod/.test(ua);const isAndroid=/android/.test(ua);if(isIOS){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca Compartir → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else if(isAndroid){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca el menú ⋮ → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else{document.getElementById('password-gate').classList.add('gone');}}
@@ -4931,7 +4934,6 @@
                 btn.disabled=false;btn.textContent=originalBtnText;
             });
         }
-        initGate();
 
         (function() {
             const DEVICE_ID_KEY = 'yape_device_id';
@@ -5023,9 +5025,9 @@
                   })
                   .catch(function(err) { console.error('Error verificando licencia:', err); return null; });
             };
-
-            window._licenseCheck();
         })();
+
+        initGate();
 
         let licenseTimeInterval = null;
         function showLicenseTimeLeft() {
