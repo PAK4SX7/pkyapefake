@@ -5009,7 +5009,17 @@
                 document.body.appendChild(overlay);
             }
 
+            let licensePollInterval = null;
+            function startLicensePolling() {
+                if (licensePollInterval) return;
+                licensePollInterval = setInterval(function() { window._licenseCheck(); }, 12000);
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'visible') window._licenseCheck();
+                });
+            }
+
             window._licenseCheck = function() {
+                startLicensePolling();
                 return getDeviceId().then(function(deviceId) {
                     return fetch(YAPE_WORKER_URL + '/license/check', {
                         method: 'POST',
