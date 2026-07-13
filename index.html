@@ -1799,6 +1799,18 @@
             justify-content: space-between;
             align-items: flex-start;
             padding: clamp(12px, 4vw, 22px) clamp(20px, 6vw, 32px) clamp(10px, 3vw, 20px);
+            position: relative;
+        }
+        .vchr-header-ad {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            height: clamp(100px, 21vw, 122px);
+            width: auto;
+            max-width: 60%;
+            object-fit: contain;
+            pointer-events: none;
         }
         .vchr-logo {
             display: flex;
@@ -3504,7 +3516,7 @@
                 <div class="vchr-logo">
                     <img class="vchr-logo-gif" id="receiptLogoGif" src="https://i.ibb.co/PsjqP3kY/Animation-Yape.gif" alt="Yape">
                 </div>
-                <img src="https://i.ibb.co/LhsmyYnG/anuncio-arriva-yape.jpg" alt="Anuncio" style="height:clamp(100px, 21vw, 122px); width:auto; max-width:88%; object-fit:contain; align-self:center;">
+                <img class="vchr-header-ad" src="https://i.ibb.co/LhsmyYnG/anuncio-arriva-yape.jpg" alt="Anuncio">
                 <button class="vchr-close-btn" id="receiptCloseBtn" aria-label="Cerrar">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round">
                         <line x1="4" y1="4" x2="20" y2="20"/>
