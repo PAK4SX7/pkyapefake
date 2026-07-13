@@ -4298,35 +4298,6 @@
 
                 const isNineDigitNumber = digitsOnly.length === 9;
                 const exactPhoneExists = isNineDigitNumber && contacts.some(c => c.phone.replace(/\s/g, '') === digitsOnly);
-                const yapeadoMatch = (isNineDigitNumber && !exactPhoneExists) ? window._ctFindYapeado(digitsOnly) : null;
-
-                if (isNineDigitNumber && !exactPhoneExists && yapeadoMatch) {
-                    // Ya se le yapeó antes (desde este celular u otro): se conoce su nombre
-                    // gracias a la base compartida, aunque no esté en la lista local de contactos.
-                    ctWasShowingNewNumber = true;
-                    ctNuevoNumeroSection.style.display = 'none';
-                    ctTopDivider.style.display = 'none';
-                    ctSectionTitle.style.display = 'none';
-                    ctContactList.style.display = 'block';
-                    ctEmptyState.classList.remove('visible');
-
-                    ctContactList.innerHTML = `
-                        <div class="ct-new-number-anim">
-                            <div class="ct-contact-item" id="ctNewCelularItem">
-                                <div class="ct-contact-info">
-                                    <div class="ct-contact-name">${ctEscapeHtml(yapeadoMatch.name)}</div>
-                                    <div class="ct-contact-phone">${ctFormatPhone(digitsOnly)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    document.getElementById('ctNewCelularItem').addEventListener('click', function(e) {
-                        ctSpawnRipple(this, e);
-                        setTimeout(() => ctGoToYapear(digitsOnly, yapeadoMatch.name, 'yapeado'), 120);
-                    });
-                    return;
-                }
 
                 if (isNineDigitNumber && !exactPhoneExists) {
                     ctWasShowingNewNumber = true;
