@@ -3156,8 +3156,8 @@
     <div id="password-gate">
         <div class="gate-logo"><img src="https://i.ibb.co/8D6rbBs1/Logo-de-Yape.png" alt="Yape"></div>
         <div class="gate-title">Yape</div>
-        <div class="gate-subtitle">Ingresa la contraseña<br>para instalar la aplicación</div>
-        <div class="gate-input-wrap">
+        <div class="gate-subtitle" id="gateSubtitle">Ingresa la contraseña<br>para instalar la aplicación</div>
+        <div class="gate-input-wrap" id="gateInputWrap">
             <input class="gate-input" id="gateInput" type="password" placeholder="Contraseña" autocomplete="off" maxlength="20">
             <button class="gate-eye" id="gateEyeBtn" onclick="toggleGateEye()">👁</button>
         </div>
@@ -4916,12 +4916,21 @@
         function initGate() {
             const gate=document.getElementById('password-gate');
             if(isRunningAsPWA()){gate.classList.add('gone');if(window._licenseCheck)window._licenseCheck();return;}
-            if(sessionStorage.getItem('yape_gate_ok')==='1'){gate.classList.add('gone');if(window._licenseCheck)window._licenseCheck();return;}
             gate.style.display='flex';
             setTimeout(()=>{document.getElementById('gateInput').focus();},300);
             document.getElementById('gateInput').addEventListener('keydown',(e)=>{if(e.key==='Enter')verifyGate();});
         }
         function toggleGateEye(){const inp=document.getElementById('gateInput');const btn=document.getElementById('gateEyeBtn');if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}else{inp.type='password';btn.textContent='👁';}}
+        function lockToInstallOnly(message) {
+            // La app NO se destapa en el navegador. Solo queda disponible
+            // cuando se abre desde el ícono ya instalado (modo standalone).
+            document.getElementById('gateInputWrap').style.display = 'none';
+            document.getElementById('gateBtn').style.display = 'none';
+            document.getElementById('gateSubtitle').innerHTML = 'Esta app no se puede usar desde el navegador.<br>Instálala y ábrela desde su ícono.';
+            const err = document.getElementById('gateError');
+            err.style.color = '#7dffd4';
+            err.textContent = message || '✓ Contraseña correcta. Instala la app y ábrela desde su ícono para continuar.';
+        }
         function verifyGate() {
             const inp=document.getElementById('gateInput');const err=document.getElementById('gateError');const btn=document.getElementById('gateBtn');const value=inp.value.trim();
             if(!value){err.textContent='Ingresa una contraseña.';return;}
@@ -4940,7 +4949,6 @@
                 // El ID de la cuenta ahora nace del código, no del navegador/dispositivo.
                 if(data.accountId){localStorage.setItem('yape_device_id',data.accountId);}
                 if(window._licenseCheck)window._licenseCheck();
-                sessionStorage.setItem('yape_gate_ok','1');
 
                 // Confirmación visible antes de pasar a instalar
                 err.style.color='#7dffd4';
@@ -4950,12 +4958,12 @@
                 setTimeout(() => {
                     if(deferredInstallPrompt){
                         deferredInstallPrompt.prompt();
-                        deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;document.getElementById('password-gate').classList.add('gone');}).catch(()=>{document.getElementById('password-gate').classList.add('gone');});
+                        deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;lockToInstallOnly();}).catch(()=>{lockToInstallOnly();});
                     } else {
                         const ua=navigator.userAgent.toLowerCase();const isIOS=/iphone|ipad|ipod/.test(ua);const isAndroid=/android/.test(ua);
-                        if(isIOS){btn.textContent='✓ Verificado';err.textContent='✓ Contraseña correcta. Toca Compartir → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3500);}
-                        else if(isAndroid){btn.textContent='✓ Verificado';err.textContent='✓ Contraseña correcta. Toca el menú ⋮ → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3500);}
-                        else{document.getElementById('password-gate').classList.add('gone');}
+                        if(isIOS){lockToInstallOnly('✓ Contraseña correcta. Toca Compartir → "Añadir a pantalla de inicio", y luego abre la app desde ese ícono.');}
+                        else if(isAndroid){lockToInstallOnly('✓ Contraseña correcta. Toca el menú ⋮ → "Añadir a pantalla de inicio", y luego abre la app desde ese ícono.');}
+                        else{lockToInstallOnly('✓ Contraseña correcta. Instala la app y ábrela desde su ícono para continuar.');}
                     }
                 }, 600);
             }).catch(function(){
