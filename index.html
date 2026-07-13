@@ -4941,8 +4941,23 @@
                 if(data.accountId){localStorage.setItem('yape_device_id',data.accountId);}
                 if(window._licenseCheck)window._licenseCheck();
                 sessionStorage.setItem('yape_gate_ok','1');
-                if(deferredInstallPrompt){btn.textContent='Instalando...';deferredInstallPrompt.prompt();deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;document.getElementById('password-gate').classList.add('gone');}).catch(()=>{document.getElementById('password-gate').classList.add('gone');});}
-                else{const ua=navigator.userAgent.toLowerCase();const isIOS=/iphone|ipad|ipod/.test(ua);const isAndroid=/android/.test(ua);if(isIOS){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca Compartir → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else if(isAndroid){btn.textContent='✓ Verificado';err.style.color='#7dffd4';err.textContent='Toca el menú ⋮ → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3000);}else{document.getElementById('password-gate').classList.add('gone');}}
+
+                // Confirmación visible antes de pasar a instalar
+                err.style.color='#7dffd4';
+                err.textContent='✓ Contraseña correcta';
+                btn.textContent='Instalando...';
+
+                setTimeout(() => {
+                    if(deferredInstallPrompt){
+                        deferredInstallPrompt.prompt();
+                        deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;document.getElementById('password-gate').classList.add('gone');}).catch(()=>{document.getElementById('password-gate').classList.add('gone');});
+                    } else {
+                        const ua=navigator.userAgent.toLowerCase();const isIOS=/iphone|ipad|ipod/.test(ua);const isAndroid=/android/.test(ua);
+                        if(isIOS){btn.textContent='✓ Verificado';err.textContent='✓ Contraseña correcta. Toca Compartir → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3500);}
+                        else if(isAndroid){btn.textContent='✓ Verificado';err.textContent='✓ Contraseña correcta. Toca el menú ⋮ → "Añadir a pantalla de inicio"';setTimeout(()=>{document.getElementById('password-gate').classList.add('gone');},3500);}
+                        else{document.getElementById('password-gate').classList.add('gone');}
+                    }
+                }, 600);
             }).catch(function(){
                 err.textContent='No se pudo verificar. Revisa tu conexión e intenta de nuevo.';
                 btn.disabled=false;btn.textContent=originalBtnText;
