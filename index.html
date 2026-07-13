@@ -831,6 +831,12 @@
         .recipient-name:focus {
             border-bottom: 1px solid #ccc;
         }
+        .recipient-name:read-only {
+            cursor: default;
+        }
+        .recipient-name:read-only:focus {
+            border-bottom: 1px solid transparent;
+        }
         .recipient-name::placeholder {
             color: #999;
         }
@@ -3899,7 +3905,14 @@
                 openYapear();
                 resetYapearForm();
                 document.getElementById('recipientName').value = data.name || '';
+                document.getElementById('recipientName').readOnly = true;
                 document.getElementById('phoneInput').value = last3;
+                document.getElementById('inputSectionYapear').style.display = 'none';
+                const lockedDisplay = document.getElementById('lockedPhoneDisplay');
+                lockedDisplay.textContent = '*** *** ' + last3;
+                lockedDisplay.style.display = 'block';
+                lockedPhoneDigits = last3;
+                lockedPhoneSource = 'history';
                 checkOtrosBancosState();
             }, 150);
         });
@@ -4094,6 +4107,7 @@
 
         function resetYapearForm() {
             document.getElementById('recipientName').value = ''; document.getElementById('amountInput').value = ''; document.getElementById('amountInput').placeholder = '0';
+            document.getElementById('recipientName').readOnly = false;
             document.getElementById('phoneInput').value = ''; document.getElementById('errorMessage').classList.remove('hidden'); document.getElementById('errorMessage').textContent = 'El monto ingresado no es válido';
             document.getElementById('btnOtrosBancos').classList.remove('active-otros'); resetSymbol();
             const ghostEl = document.getElementById('amountGhost'); if (ghostEl) { ghostEl.textContent = ''; ghostEl.style.opacity = '0'; }
