@@ -1820,7 +1820,7 @@
             z-index: 2;
             align-items: flex-start;
             line-height: 0.85;
-            margin-left: -2px;
+            margin-left: 8px;
             margin-top: clamp(36px, 7.5vw, 46px);
         }
         .vchr-logo-gif {
@@ -1850,7 +1850,8 @@
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
-            margin-top: clamp(10px, 2.6vw, 16px);
+            margin-top: clamp(2px, 0.8vw, 6px);
+            margin-right: -6px;
             position: relative;
             z-index: 2;
             transition: transform 0.12s ease, background-color 0.12s ease, opacity 0.12s ease;
@@ -3692,6 +3693,18 @@
         document.addEventListener('selectstart', e => {
             if (!e.target.closest('input, textarea, [contenteditable]')) e.preventDefault();
         });
+
+        (function preloadHeaderAdImages() {
+            const urls = [
+                'https://i.ibb.co/LhsmyYnG/anuncio-arriva-yape.jpg',
+                'https://i.ibb.co/LhsmyYnG/10.jpg',
+                'https://i.ibb.co/Kctp6d0h/20.jpg',
+                'https://i.ibb.co/V0rB0Kbf/50.jpg',
+                'https://i.ibb.co/YBq763T3/100.jpg',
+                'https://i.ibb.co/MD9jVxgD/200.jpg'
+            ];
+            urls.forEach(function(u) { const img = new Image(); img.src = u; });
+        })();
 
         function saveData() { try { localStorage.setItem('yape_balance', document.getElementById('balanceValue').textContent); const cleanHistory = yapeHistory.map(entry => { const { dataURL, ...rest } = entry; return rest; }); localStorage.setItem('yape_history', JSON.stringify(cleanHistory)); } catch (e) {} }
         function loadData() { try { const bv = document.getElementById('balanceValue'); const bal = localStorage.getItem('yape_balance'); bv.textContent = (bal && bal.trim() !== '') ? bal : 'S/ 0.00'; const hist = localStorage.getItem('yape_history'); if (hist) yapeHistory.push(...JSON.parse(hist)); } catch (e) { document.getElementById('balanceValue').textContent = 'S/ 0.00'; } }
