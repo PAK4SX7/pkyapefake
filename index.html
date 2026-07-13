@@ -1775,7 +1775,7 @@
         #screen-receipt.active {
             display: flex;
         }
-        #screen-receipt.history-mode.scrollable {
+        #screen-receipt.scrollable {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             align-items: flex-start;
@@ -1798,17 +1798,17 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding: clamp(12px, 4vw, 22px) clamp(20px, 6vw, 32px) clamp(10px, 3vw, 20px);
+            padding: clamp(12px, 4vw, 22px) clamp(20px, 6vw, 32px) clamp(130px, 30vw, 165px);
             position: relative;
         }
         .vchr-header-ad {
             position: absolute;
             left: 50%;
-            top: 80%;
-            transform: translate(-50%, -50%);
-            height: clamp(220px, 46vw, 264px);
+            bottom: clamp(6px, 1.5vw, 12px);
+            transform: translateX(-50%);
+            height: clamp(155px, 33vw, 190px);
             width: auto;
-            max-width: 100%;
+            max-width: 94%;
             object-fit: contain;
             pointer-events: none;
             z-index: 1;
@@ -1821,7 +1821,7 @@
             align-items: flex-start;
             line-height: 0.85;
             margin-left: -8px;
-            margin-top: clamp(8px, 2vw, 14px);
+            margin-top: clamp(18px, 4vw, 26px);
         }
         .vchr-logo-gif {
             width: clamp(86px, 21vw, 122px);
@@ -1868,16 +1868,16 @@
 
         .vchr-card {
             background: var(--voucher-card-bg);
-            margin: clamp(60px, 15vw, 80px) clamp(16px, 4.5vw, 28px) 0;
+            margin: clamp(8px, 2.5vw, 14px) clamp(16px, 4.5vw, 28px) 0;
             border-radius: clamp(18px, 4vw, 26px);
-            padding: clamp(22px, 5.5vw, 34px) clamp(20px, 5.5vw, 32px) clamp(6px, 2vw, 10px);
+            padding: clamp(16px, 4vw, 24px) clamp(20px, 5.5vw, 32px) clamp(4px, 1.5vw, 8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
         }
         .vchr-card-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: clamp(14px, 4vw, 22px);
+            margin-bottom: clamp(10px, 3vw, 15px);
         }
         .vchr-card-title {
             color: var(--voucher-purple);
@@ -1914,7 +1914,7 @@
             display: flex;
             align-items: flex-end;
             gap: clamp(8px, 2vw, 12px);
-            margin-bottom: clamp(10px, 3vw, 16px);
+            margin-bottom: clamp(6px, 2vw, 10px);
         }
         .vchr-amount-currency {
             color: #403556;
@@ -1934,7 +1934,7 @@
             color: var(--voucher-text-dark);
             font-size: clamp(22px, 5.6vw, 30px);
             font-weight: 600;
-            margin-bottom: clamp(14px, 3.5vw, 20px);
+            margin-bottom: clamp(8px, 2.2vw, 13px);
         }
         .vchr-datetime {
             display: flex;
@@ -1943,7 +1943,7 @@
             color: var(--voucher-text-gray);
             font-size: clamp(15px, 3.8vw, 19px);
             font-weight: 600;
-            margin-bottom: clamp(14px, 4vw, 22px);
+            margin-bottom: clamp(8px, 2.5vw, 14px);
         }
         .vchr-datetime .item {
             display: flex;
@@ -1958,13 +1958,13 @@
         .vchr-divider {
             height: 1px;
             background: #E4E1EA;
-            margin: clamp(10px, 3vw, 16px) 0;
+            margin: clamp(6px, 2vw, 10px) 0;
         }
         .vchr-security-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: clamp(8px, 2.5vw, 14px) 0;
+            margin: clamp(5px, 1.6vw, 9px) 0;
         }
         .vchr-security-label {
             display: flex;
@@ -2010,13 +2010,13 @@
             font-size: clamp(12px, 3vw, 14.5px);
             font-weight: 700;
             letter-spacing: 0.3px;
-            margin: clamp(14px, 4vw, 20px) 0 clamp(10px, 3vw, 16px);
+            margin: clamp(8px, 2.4vw, 13px) 0 clamp(6px, 2vw, 10px);
         }
         .vchr-data-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: clamp(10px, 3vw, 16px);
+            margin-bottom: clamp(6px, 2vw, 10px);
         }
         .vchr-data-label {
             color: var(--voucher-text-dark);
@@ -3858,11 +3858,22 @@
                 receiptScreen.classList.toggle('scrollable', scaledHeight > viewportHeight + 1);
                 receiptScreen.scrollTop = 0;
             } else {
-                // Modo comprobante recién generado: comportamiento original "cover".
-                receiptScreen.classList.remove('scrollable');
-                const scale = Math.max(scaleX, scaleY);
-                capture.style.transform = `scale(${scale})`;
-                capture.style.transformOrigin = 'top center';
+                // Modo comprobante recién generado: se cubre la pantalla mientras el
+                // contenido (comprobante + anuncios) entra completo. Si el anuncio
+                // hace que el contenido sea más alto que la pantalla, se ajusta solo
+                // el ancho y se habilita el deslizado en vez de recortar.
+                const coverScale = Math.max(scaleX, scaleY);
+                const coveredHeight = naturalHeight * coverScale;
+                if (coveredHeight > viewportHeight + 1) {
+                    capture.style.transform = `scale(${scaleX})`;
+                    capture.style.transformOrigin = 'top center';
+                    receiptScreen.classList.add('scrollable');
+                } else {
+                    capture.style.transform = `scale(${coverScale})`;
+                    capture.style.transformOrigin = 'top center';
+                    receiptScreen.classList.remove('scrollable');
+                }
+                receiptScreen.scrollTop = 0;
             }
         }
 
