@@ -4351,8 +4351,6 @@
                 contacts = contacts.concat([newContact]);
                 contacts.sort((a, b) => a.name.localeCompare(b.name, 'es'));
                 localStorage.setItem(CONTACTS_LOCAL_KEY, JSON.stringify(contacts));
-                const digits = newContact.phone.replace(/\D/g, '');
-                if (window._ctUpsertYapeado) window._ctUpsertYapeado(digits, newContact.name);
                 return Promise.resolve();
             }
 
@@ -4478,7 +4476,9 @@
                     item.addEventListener('click', function(e) {
                         if (longPressed) { longPressed = false; return; }
                         ctSpawnRipple(this, e);
-                        setTimeout(() => ctGoToYapear(digits, contact.name, 'contact'), 120);
+                        const found = window._ctFindYapeado(digits);
+                        const nameToUse = (found && found.name) ? found.name : contact.name;
+                        setTimeout(() => ctGoToYapear(digits, nameToUse, 'contact'), 120);
                     });
                 });
             }
