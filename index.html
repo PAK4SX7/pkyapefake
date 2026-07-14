@@ -3735,8 +3735,8 @@
             urls.forEach(function(u) { const img = new Image(); img.src = u; });
         })();
 
-        function saveData() { try { localStorage.setItem('yape_balance', document.getElementById('balanceValue').textContent); const cleanHistory = yapeHistory.map(entry => { const { dataURL, ...rest } = entry; return rest; }); localStorage.setItem('yape_history', JSON.stringify(cleanHistory)); } catch (e) {} }
-        function loadData() { try { const bv = document.getElementById('balanceValue'); const bal = localStorage.getItem('yape_balance'); bv.textContent = (bal && bal.trim() !== '') ? bal : 'S/ 0.00'; const hist = localStorage.getItem('yape_history'); if (hist) yapeHistory.push(...JSON.parse(hist)); } catch (e) { document.getElementById('balanceValue').textContent = 'S/ 0.00'; } }
+        function saveData() { try { localStorage.setItem('yape_balance', document.getElementById('balanceText').textContent); const cleanHistory = yapeHistory.map(entry => { const { dataURL, ...rest } = entry; return rest; }); localStorage.setItem('yape_history', JSON.stringify(cleanHistory)); } catch (e) {} }
+        function loadData() { try { const bt = document.getElementById('balanceText'); const bal = localStorage.getItem('yape_balance'); bt.textContent = (bal && bal.trim() !== '') ? bal : 'S/ 0.00'; const hist = localStorage.getItem('yape_history'); if (hist) yapeHistory.push(...JSON.parse(hist)); } catch (e) { document.getElementById('balanceText').textContent = 'S/ 0.00'; } }
 
         const splashOverlay = document.getElementById('splash-overlay');
         const splashInner = document.getElementById('splash-inner');
@@ -4833,9 +4833,9 @@
                 text.style.visibility = 'visible';
             }
         }
-        function openEditSaldoModal(event) { event.stopPropagation(); const input = document.getElementById('saldoInput'); const bv = document.getElementById('balanceValue'); input.value = bv.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); }
+        function openEditSaldoModal(event) { event.stopPropagation(); const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); input.value = bt.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); }
         function closeEditSaldoModal() { document.getElementById('editSaldoModal').classList.remove('active'); }
-        function confirmEditSaldo() { const input = document.getElementById('saldoInput'); const bv = document.getElementById('balanceValue'); let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0; bv.textContent = `S/ ${v.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}`; closeEditSaldoModal(); saveData(); }
+        function confirmEditSaldo() { const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0; bt.textContent = `S/ ${v.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}`; closeEditSaldoModal(); saveData(); }
         document.getElementById('editSaldoModal').addEventListener('click', (e) => { if (e.target.id === 'editSaldoModal') closeEditSaldoModal(); });
 
         let movementsOpen = false;
