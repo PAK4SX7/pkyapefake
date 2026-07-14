@@ -479,7 +479,6 @@
             font-weight: 500;
             color: #1a1a1a;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
         .balance-value.hidden {
             visibility: hidden;
@@ -4814,7 +4813,9 @@
 
         let balanceVisible = false;
         let balanceSpinnerTimeout = null;
+        let balanceLoading = false;
         function toggleBalanceVisibility() {
+            if (balanceLoading) return;
             const bv = document.getElementById('balanceValue');
             const bl = document.getElementById('balanceLabel');
             const spinner = document.getElementById('balanceSpinner');
@@ -4826,12 +4827,14 @@
                 balanceVisible = true;
                 text.style.visibility = 'hidden';
                 spinner.classList.add('active');
+                balanceLoading = true;
                 if (balanceSpinnerTimeout) clearTimeout(balanceSpinnerTimeout);
                 const delay = 600 + Math.random() * 600; // entre 0.60 y 1.20 segundos
                 balanceSpinnerTimeout = setTimeout(function() {
                     spinner.classList.remove('active');
                     text.style.visibility = 'visible';
                     balanceSpinnerTimeout = null;
+                    balanceLoading = false;
                 }, delay);
             } else {
                 if (balanceSpinnerTimeout) { clearTimeout(balanceSpinnerTimeout); balanceSpinnerTimeout = null; }
