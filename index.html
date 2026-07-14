@@ -4840,7 +4840,6 @@
                 setEyeIcon(true);
                 balanceVisible = false;
                 spinner.classList.remove('active');
-                text.style.visibility = 'visible';
             }
         }
         function openEditSaldoModal(event) { event.stopPropagation(); const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); input.value = bt.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); }
