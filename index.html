@@ -488,7 +488,7 @@
         .balance-spinner {
             position: absolute;
             top: 50%;
-            right: 16px;
+            right: 22px;
             transform: translateY(-50%);
             width: 26px;
             height: 26px;
@@ -4813,6 +4813,7 @@
         goTo(0, false); startAutoSlide();
 
         let balanceVisible = false;
+        let balanceSpinnerTimeout = null;
         function toggleBalanceVisibility() {
             const bv = document.getElementById('balanceValue');
             const bl = document.getElementById('balanceLabel');
@@ -4825,12 +4826,15 @@
                 balanceVisible = true;
                 text.style.visibility = 'hidden';
                 spinner.classList.add('active');
-                const delay = 600 + Math.random() * 900; // entre 0.60 y 1.5 segundos
-                setTimeout(function() {
+                if (balanceSpinnerTimeout) clearTimeout(balanceSpinnerTimeout);
+                const delay = 600 + Math.random() * 600; // entre 0.60 y 1.20 segundos
+                balanceSpinnerTimeout = setTimeout(function() {
                     spinner.classList.remove('active');
                     text.style.visibility = 'visible';
+                    balanceSpinnerTimeout = null;
                 }, delay);
             } else {
+                if (balanceSpinnerTimeout) { clearTimeout(balanceSpinnerTimeout); balanceSpinnerTimeout = null; }
                 bv.classList.add('hidden');
                 bl.textContent = 'Mostrar saldo';
                 setEyeIcon(true);
