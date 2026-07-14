@@ -484,6 +484,21 @@
             visibility: hidden;
             opacity: 0;
         }
+        .balance-spinner {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2.5px solid rgba(60,60,67,0.28);
+            border-top-color: rgba(60,60,67,0.65);
+            animation: balanceSpin 0.7s linear infinite;
+            display: none;
+        }
+        .balance-spinner.active {
+            display: inline-block;
+        }
+        @keyframes balanceSpin {
+            to { transform: rotate(360deg); }
+        }
         .movements-row {
             display: flex;
             align-items: center;
@@ -3290,7 +3305,7 @@
             <div class="bottom-panel main-section" id="sec-bottom">
                 <div class="balance-card">
                     <div class="balance-left" onclick="toggleBalanceVisibility()"><div class="balance-icon" id="eyeIconWrapper"><img id="eyeIconImg" class="eye-svg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23742284'%3E%3Cpath d='M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'/%3E%3C/svg%3E" alt="ojo"></div><span class="balance-label" id="balanceLabel">Mostrar saldo</span></div>
-                    <div class="balance-value hidden" id="balanceValue" onclick="openEditSaldoModal(event)">S/ 0.00</div>
+                    <div class="balance-value hidden" id="balanceValue" onclick="openEditSaldoModal(event)"><span class="balance-spinner" id="balanceSpinner"></span><span id="balanceText">S/ 0.00</span></div>
                 </div>
                 <div class="movements-row" id="movementsToggle"><div class="movements-left"><div class="movements-icon"><img src="https://i.ibb.co/bjdR5CNH/Icono-ver-movimientos.png" alt="Ver movimientos"></div><span class="movements-text">Mostrar movimientos</span></div><div class="movements-arrow" id="movementsArrow"><svg viewBox="0 0 24 24" fill="none" stroke="#742284" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div></div>
                 <div class="movements-list" id="movementsList"></div>
@@ -4792,7 +4807,32 @@
         goTo(0, false); startAutoSlide();
 
         let balanceVisible = false;
-        function toggleBalanceVisibility() { const bv = document.getElementById('balanceValue'); const bl = document.getElementById('balanceLabel'); if (bv.classList.contains('hidden')) { bv.classList.remove('hidden'); bl.textContent = 'Ocultar saldo'; setEyeIcon(false); balanceVisible = true; } else { bv.classList.add('hidden'); bl.textContent = 'Mostrar saldo'; setEyeIcon(true); balanceVisible = false; } }
+        function toggleBalanceVisibility() {
+            const bv = document.getElementById('balanceValue');
+            const bl = document.getElementById('balanceLabel');
+            const spinner = document.getElementById('balanceSpinner');
+            const text = document.getElementById('balanceText');
+            if (bv.classList.contains('hidden')) {
+                bv.classList.remove('hidden');
+                bl.textContent = 'Ocultar saldo';
+                setEyeIcon(false);
+                balanceVisible = true;
+                text.style.visibility = 'hidden';
+                spinner.classList.add('active');
+                const delay = 600 + Math.random() * 900; // entre 0.60 y 1.5 segundos
+                setTimeout(function() {
+                    spinner.classList.remove('active');
+                    text.style.visibility = 'visible';
+                }, delay);
+            } else {
+                bv.classList.add('hidden');
+                bl.textContent = 'Mostrar saldo';
+                setEyeIcon(true);
+                balanceVisible = false;
+                spinner.classList.remove('active');
+                text.style.visibility = 'visible';
+            }
+        }
         function openEditSaldoModal(event) { event.stopPropagation(); const input = document.getElementById('saldoInput'); const bv = document.getElementById('balanceValue'); input.value = bv.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); }
         function closeEditSaldoModal() { document.getElementById('editSaldoModal').classList.remove('active'); }
         function confirmEditSaldo() { const input = document.getElementById('saldoInput'); const bv = document.getElementById('balanceValue'); let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0; bv.textContent = `S/ ${v.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}`; closeEditSaldoModal(); saveData(); }
