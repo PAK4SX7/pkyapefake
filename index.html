@@ -835,6 +835,7 @@
             justify-content: center;
             padding: 20px 0;
             flex-shrink: 0;
+            position: relative;
         }
         .recipient-name {
             font-size: 19px;
@@ -880,11 +881,14 @@
             width: 210px;
             max-width: 60%;
             height: 15px;
-            margin: 8px auto 0;
             border-radius: 999px;
             background: linear-gradient(90deg, #EDEDF2 25%, #F7F7FA 37%, #EDEDF2 63%);
             background-size: 400% 100%;
             animation: nameSkeletonShimmer 1.4s ease-in-out infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         .name-skeleton.visible {
             display: block;
