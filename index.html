@@ -875,6 +875,24 @@
             0%, 100% { opacity: 0.35; }
             50% { opacity: 0.8; }
         }
+        .name-skeleton {
+            display: none;
+            width: 210px;
+            max-width: 60%;
+            height: 15px;
+            margin: 8px auto 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #EDEDF2 25%, #F7F7FA 37%, #EDEDF2 63%);
+            background-size: 400% 100%;
+            animation: nameSkeletonShimmer 1.4s ease-in-out infinite;
+        }
+        .name-skeleton.visible {
+            display: block;
+        }
+        @keyframes nameSkeletonShimmer {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
         .amount-section {
             flex-grow: 1;
             display: flex;
@@ -3480,7 +3498,7 @@
     <div id="screen-yapear">
         <div class="yapear-container">
             <div class="yapear-header"><button class="yapear-icon-btn" id="btnBack">‹</button><div>Yapear a</div><button class="yapear-icon-btn" id="btnClose">&times;</button></div>
-            <div class="recipient-section"><input type="text" class="recipient-name" id="recipientName" placeholder="Nombre"><div class="locked-phone-display" id="lockedPhoneDisplay">*** *** 000</div></div>
+            <div class="recipient-section"><input type="text" class="recipient-name" id="recipientName" placeholder="Nombre"><div class="name-skeleton" id="nameSkeleton"></div><div class="locked-phone-display" id="lockedPhoneDisplay">*** *** 000</div></div>
             <div class="amount-section"><div class="amount-wrapper"><span class="currency-symbol" id="currencySymbol">S/</span><input type="text" class="amount-input" id="amountInput" placeholder="0" inputmode="decimal"><span class="amount-ghost" id="amountGhost"></span></div><div class="error-message" id="errorMessage">El monto ingresado no es válido</div></div>
             <div class="input-section" id="inputSectionYapear"><input type="tel" class="number-input" id="phoneInput" placeholder="Agregar número" maxlength="3"></div>
             <div class="yapear-footer"><button class="yapear-btn yapear-btn-secondary" id="btnOtrosBancos">Otros bancos</button><button class="yapear-btn yapear-btn-primary" id="btnConfirmYapear">Yapear</button></div>
@@ -4574,6 +4592,9 @@
             lockedPhoneDigits = null; lockedPhoneSource = null;
             document.getElementById('inputSectionYapear').style.display = '';
             document.getElementById('lockedPhoneDisplay').style.display = 'none';
+            document.getElementById('recipientName').style.visibility = 'visible';
+            const nameSkeletonEl = document.getElementById('nameSkeleton');
+            if (nameSkeletonEl) nameSkeletonEl.classList.remove('visible');
         }
 
         function openYapearLocked(fullPhoneDigits, name, source) {
@@ -4586,23 +4607,27 @@
             lockedPhoneSource = source;
             document.getElementById('inputSectionYapear').style.display = 'none';
             const lockedDisplay = document.getElementById('lockedPhoneDisplay');
+            const nameSkeleton = document.getElementById('nameSkeleton');
 
-            // Estado "cargando": borroso y en movimiento mientras se resuelve el nombre/número
+            // Estado "cargando": se muestra un rectángulo de carga; el nombre y el
+            // número permanecen ocultos hasta que termine.
             nameInput.value = '';
             nameInput.placeholder = '';
-            nameInput.classList.add('field-loading');
-            lockedDisplay.textContent = '••• ••• •••';
-            lockedDisplay.style.display = 'block';
-            lockedDisplay.classList.add('field-loading');
+            nameInput.style.visibility = 'hidden';
+            nameSkeleton.classList.add('visible');
+            lockedDisplay.style.display = 'none';
+            lockedDisplay.textContent = '';
 
+            const loadingTime = 600 + Math.random() * 900;
             setTimeout(() => {
-                nameInput.classList.remove('field-loading');
-                lockedDisplay.classList.remove('field-loading');
+                nameSkeleton.classList.remove('visible');
+                nameInput.style.visibility = 'visible';
                 nameInput.value = name || '';
                 nameInput.placeholder = 'Nombre';
                 lockedDisplay.textContent = '*** *** ' + last3;
+                lockedDisplay.style.display = 'block';
                 checkOtrosBancosState();
-            }, 1500);
+            }, loadingTime);
         }
 
         function openYapearQR(name) {
