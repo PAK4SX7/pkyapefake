@@ -4212,7 +4212,7 @@
         function renderMovementsSkeleton() {
             const list = document.getElementById('movementsList');
             let html = '';
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 7; i++) {
                 html += `<div class="movement-item movement-item-skeleton"><div class="movement-info"><div class="mv-skel-name"></div><div class="mv-skel-date"></div></div><div class="mv-skel-amount"></div></div>`;
             }
             list.innerHTML = html;
@@ -5262,7 +5262,7 @@
             if (movementsOpen) {
                 renderMovementsSkeleton(); list.classList.add('open'); arrow.classList.add('open'); toggle.classList.add('expanded'); spacer.style.display = 'none'; screenMain.classList.add('scrollable');
                 if (movementsSkeletonTimeout) clearTimeout(movementsSkeletonTimeout);
-                const delay = 600 + Math.random() * 600; // mismo tiempo que la carga del saldo
+                const delay = 500 + Math.random() * 1000; // entre 0.50 y 1.50 segundos
                 movementsSkeletonTimeout = setTimeout(() => {
                     movementsSkeletonTimeout = null;
                     if (movementsOpen) renderMovements();
