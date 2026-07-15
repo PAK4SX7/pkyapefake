@@ -637,6 +637,28 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
+        .mv-skel-name, .mv-skel-date, .mv-skel-amount {
+            border-radius: 999px;
+            background: linear-gradient(90deg, #EDEDF2 25%, #F7F7FA 37%, #EDEDF2 63%);
+            background-size: 400% 100%;
+            animation: nameSkeletonShimmer 1.4s ease-in-out infinite;
+        }
+        .mv-skel-name {
+            width: 62%;
+            max-width: 180px;
+            height: 14px;
+            margin-bottom: 7px;
+        }
+        .mv-skel-date {
+            width: 30%;
+            max-width: 80px;
+            height: 10px;
+        }
+        .mv-skel-amount {
+            width: 50px;
+            height: 13px;
+            flex-shrink: 0;
+        }
         .ver-todos-btn {
             padding: 20px 14px 16px;
             text-align: center;
@@ -4187,6 +4209,15 @@
             });
         }
 
+        function renderMovementsSkeleton() {
+            const list = document.getElementById('movementsList');
+            let html = '';
+            for (let i = 0; i < 4; i++) {
+                html += `<div class="movement-item movement-item-skeleton"><div class="movement-info"><div class="mv-skel-name"></div><div class="mv-skel-date"></div></div><div class="mv-skel-amount"></div></div>`;
+            }
+            list.innerHTML = html;
+        }
+
         function renderMovements() {
             const list = document.getElementById('movementsList');
             if (yapeHistory.length === 0) { list.innerHTML = '<div class="movements-empty">Sin movimientos aún</div>'; return; }
@@ -4564,6 +4595,7 @@
             document.getElementById('balanceLabel').textContent = 'Mostrar saldo';
             setEyeIcon(true);
             movementsOpen = false;
+            if (movementsSkeletonTimeout) { clearTimeout(movementsSkeletonTimeout); movementsSkeletonTimeout = null; }
             document.getElementById('movementsList').classList.remove('open');
             document.getElementById('movementsArrow').classList.remove('open');
             document.getElementById('movementsToggle').classList.remove('expanded');
@@ -5223,11 +5255,21 @@
         document.getElementById('editSaldoModal').addEventListener('click', (e) => { if (e.target.id === 'editSaldoModal') closeEditSaldoModal(); });
 
         let movementsOpen = false;
+        let movementsSkeletonTimeout = null;
         document.getElementById('movementsToggle').addEventListener('click', () => {
             movementsOpen = !movementsOpen;
             const list = document.getElementById('movementsList'); const arrow = document.getElementById('movementsArrow'); const toggle = document.getElementById('movementsToggle'); const spacer = document.getElementById('movementsSpacer');
-            if (movementsOpen) { renderMovements(); list.classList.add('open'); arrow.classList.add('open'); toggle.classList.add('expanded'); spacer.style.display = 'none'; screenMain.classList.add('scrollable'); }
+            if (movementsOpen) {
+                renderMovementsSkeleton(); list.classList.add('open'); arrow.classList.add('open'); toggle.classList.add('expanded'); spacer.style.display = 'none'; screenMain.classList.add('scrollable');
+                if (movementsSkeletonTimeout) clearTimeout(movementsSkeletonTimeout);
+                const delay = 600 + Math.random() * 600; // mismo tiempo que la carga del saldo
+                movementsSkeletonTimeout = setTimeout(() => {
+                    movementsSkeletonTimeout = null;
+                    if (movementsOpen) renderMovements();
+                }, delay);
+            }
             else {
+                if (movementsSkeletonTimeout) { clearTimeout(movementsSkeletonTimeout); movementsSkeletonTimeout = null; }
                 list.classList.remove('open'); arrow.classList.remove('open'); toggle.classList.remove('expanded');
                 screenMain.scrollTo({ top: 0, behavior: 'smooth' });
                 setTimeout(() => {
