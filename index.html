@@ -4272,9 +4272,10 @@
             allList.innerHTML = html;
             attachLongPress(allList, true);
             document.getElementById('screen-all-movements').classList.add('active');
+            pushScreenState('allMovements');
         }
 
-        function closeAllMovements() { document.getElementById('screen-all-movements').classList.remove('active'); if (movementsOpen) renderMovements(); }
+        function closeAllMovements() { document.getElementById('screen-all-movements').classList.remove('active'); if (movementsOpen) renderMovements(); popScreenState(); }
         function viewHistoryReceiptFromAll(index) { closeAllMovements(); viewHistoryReceipt(index); }
 
         // ========== RECEIPT SCALE — COVER (sin franjas en ningún lado) ==========
@@ -4400,6 +4401,8 @@
             screenMain.classList.remove('slide-out');
             actionBtnsFixed.style.display = 'flex';
             setTimeout(adjustReceiptScale, 50);
+            popAllScreenStates();
+            pushScreenState('receipt');
         }
 
         function hideReceiptScreen() {
@@ -4408,6 +4411,7 @@
             receiptScreen.classList.remove('scrollable');
             receiptScreenCapture.style.transform = '';
             receiptScreenCapture.style.marginTop = '0';
+            popScreenState();
         }
 
         receiptCloseBtn.addEventListener('click', function() {
@@ -4565,10 +4569,11 @@
             receiptScreen.classList.add('active');
             receiptScreen.classList.add('history-mode');
             setTimeout(adjustReceiptScale, 50);
+            pushScreenState('receipt');
         }
 
-        function openDeleteHistory(index) { deleteHistoryIndex = index; document.getElementById('deleteHistoryModal').classList.add('active'); }
-        function closeDeleteHistory() { deleteHistoryIndex = null; document.getElementById('deleteHistoryModal').classList.remove('active'); }
+        function openDeleteHistory(index) { deleteHistoryIndex = index; document.getElementById('deleteHistoryModal').classList.add('active'); pushScreenState('deleteHistory'); }
+        function closeDeleteHistory() { deleteHistoryIndex = null; document.getElementById('deleteHistoryModal').classList.remove('active'); popScreenState(); }
         function confirmDeleteHistory() { if (deleteHistoryIndex !== null) { yapeHistory.splice(deleteHistoryIndex, 1); saveData(); if (deleteHistoryFromAll) { if (yapeHistory.length === 0) closeAllMovements(); else openAllMovements(); } if (movementsOpen) renderMovements(); } closeDeleteHistory(); }
 
         let deleteContactPhone = null;
@@ -4576,23 +4581,79 @@
             deleteContactPhone = phoneDigits;
             document.getElementById('deleteContactSubtitle').textContent = '¿Deseas eliminar a ' + name + ' de tus contactos?';
             document.getElementById('deleteContactModal').classList.add('active');
+            pushScreenState('deleteContact');
         }
-        function closeDeleteContact() { deleteContactPhone = null; document.getElementById('deleteContactModal').classList.remove('active'); }
+        function closeDeleteContact() { deleteContactPhone = null; document.getElementById('deleteContactModal').classList.remove('active'); popScreenState(); }
         function confirmDeleteContact() {
             if (deleteContactPhone !== null && window._ctDeleteContact) window._ctDeleteContact(deleteContactPhone);
             closeDeleteContact();
         }
         document.getElementById('deleteHistoryModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteHistory(); });
 
-        function openDisclaimer() { document.getElementById('disclaimer-panel').classList.add('open'); document.getElementById('disclaimer-backdrop').classList.add('open'); }
-        function openPerfil() { document.getElementById('screen-perfil').classList.add('active'); }
-        function closePerfil() { document.getElementById('screen-perfil').classList.remove('active'); }
-        function closeDisclaimer() { document.getElementById('disclaimer-panel').classList.remove('open'); document.getElementById('disclaimer-backdrop').classList.remove('open'); }
+        function openDisclaimer() { document.getElementById('disclaimer-panel').classList.add('open'); document.getElementById('disclaimer-backdrop').classList.add('open'); pushScreenState('disclaimer'); }
+        function openPerfil() { document.getElementById('screen-perfil').classList.add('active'); pushScreenState('perfil'); }
+        function closePerfil() { document.getElementById('screen-perfil').classList.remove('active'); popScreenState(); }
+        function closeDisclaimer() { document.getElementById('disclaimer-panel').classList.remove('open'); document.getElementById('disclaimer-backdrop').classList.remove('open'); popScreenState(); }
 
         const screenMain = document.getElementById('screen-main');
         const screenYapear = document.getElementById('screen-yapear');
         const screenEntidad = document.getElementById('screen-entidad');
         const actionBtnsFixed = document.getElementById('actionButtonsFixed');
+
+        // ===== Manejo del botón "atrás" del dispositivo =====
+        // Cada vez que se abre una pantalla/modal que no es el menú principal,
+        // se guarda un "escalón" en el historial. Al presionar atrás en el
+        // celular, se cierra solo ese escalón (no se sale de la app), y si no
+        // hay ningún escalón abierto (estamos en el menú principal), el botón
+        // atrás del dispositivo actúa normal y sale de la app.
+        let openLayerStack = [];
+        let programmaticSkip = 0;
+        let handlingPopstate = false;
+
+        function pushScreenState(name) {
+            openLayerStack.push(name);
+            history.pushState({ appLayer: name }, '', location.href);
+        }
+
+        function popScreenState() {
+            if (handlingPopstate) return;
+            if (openLayerStack.length > 0) {
+                openLayerStack.pop();
+                programmaticSkip++;
+                history.back();
+            }
+        }
+
+        function popAllScreenStates() {
+            if (handlingPopstate) return;
+            const count = openLayerStack.length;
+            if (count === 0) return;
+            openLayerStack = [];
+            programmaticSkip += count;
+            history.go(-count);
+        }
+
+        function closeLayerByName(name) {
+            if (name === 'yapear') closeYapear();
+            else if (name === 'contacts') closeContacts();
+            else if (name === 'allMovements') closeAllMovements();
+            else if (name === 'perfil') closePerfil();
+            else if (name === 'disclaimer') closeDisclaimer();
+            else if (name === 'deleteHistory') closeDeleteHistory();
+            else if (name === 'deleteContact') closeDeleteContact();
+            else if (name === 'editSaldo') closeEditSaldoModal();
+            else if (name === 'recarga') closeRecarga();
+            else if (name === 'receipt') hideReceiptScreen();
+        }
+
+        window.addEventListener('popstate', function () {
+            if (programmaticSkip > 0) { programmaticSkip--; return; }
+            const top = openLayerStack.pop();
+            if (!top) return; // No hay nada abierto: se deja que el dispositivo salga de la app normalmente.
+            handlingPopstate = true;
+            closeLayerByName(top);
+            handlingPopstate = false;
+        });
 
         function revealMainMenuInstant() {
             screenMain.classList.add('no-transition');
@@ -4623,9 +4684,10 @@
             screenMain.classList.remove('scrollable'); screenMain.scrollTop = 0;
             screenMain.classList.add('slide-out'); actionBtnsFixed.style.display = 'none';
             screenYapear.classList.add('slide-in');
+            pushScreenState('yapear');
         }
 
-        function closeYapear() { screenYapear.classList.remove('slide-in'); screenEntidad.classList.remove('active'); document.getElementById('eaModalOverlay').classList.remove('active'); revealMainMenuInstant(); actionBtnsFixed.style.display = 'flex'; resetYapearForm(); payMode = 'yape'; }
+        function closeYapear() { screenYapear.classList.remove('slide-in'); screenEntidad.classList.remove('active'); document.getElementById('eaModalOverlay').classList.remove('active'); revealMainMenuInstant(); actionBtnsFixed.style.display = 'flex'; resetYapearForm(); payMode = 'yape'; popAllScreenStates(); }
 
         function backToContactsFromYapear() {
             screenYapear.classList.remove('slide-in');
@@ -4637,6 +4699,7 @@
             ctSearchInput.value = '';
             ctClearBtn.classList.remove('visible');
             ctRenderContacts('');
+            popScreenState();
         }
 
         function resetYapearForm() {
@@ -4715,12 +4778,14 @@
             ctSearchInput.value = '';
             ctClearBtn.classList.remove('visible');
             ctRenderContacts('');
+            pushScreenState('contacts');
         }
 
         function closeContacts() {
             screenContacts.classList.remove('slide-in');
             revealMainMenuInstant();
             actionBtnsFixed.style.display = 'flex';
+            popScreenState();
         }
 
         (function() {
@@ -5269,8 +5334,8 @@
                 spinner.classList.remove('active');
             }
         }
-        function openEditSaldoModal(event) { event.stopPropagation(); const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); input.value = bt.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); }
-        function closeEditSaldoModal() { document.getElementById('editSaldoModal').classList.remove('active'); }
+        function openEditSaldoModal(event) { event.stopPropagation(); const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); input.value = bt.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); pushScreenState('editSaldo'); }
+        function closeEditSaldoModal() { document.getElementById('editSaldoModal').classList.remove('active'); popScreenState(); }
         function confirmEditSaldo() { const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0; bt.textContent = `S/ ${v.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}`; closeEditSaldoModal(); saveData(); }
         document.getElementById('editSaldoModal').addEventListener('click', (e) => { if (e.target.id === 'editSaldoModal') closeEditSaldoModal(); });
 
@@ -5375,8 +5440,8 @@
         let selectedOperator=''; let selectedPhone=''; let selectedAmount=''; let recargaEntry=null;
 
         function showRecargaScreen(screen){[recargaScreen1,recargaScreen2,recargaScreen3,recargaSuccessScreen].forEach(s=>s.classList.remove('active'));screen.classList.add('active');}
-        function openRecarga(){screenMain.classList.add('slide-out');actionBtnsFixed.style.display='none';showRecargaScreen(recargaScreen1);}
-        function closeRecarga(){[recargaScreen1,recargaScreen2,recargaScreen3,recargaSuccessScreen].forEach(s=>s.classList.remove('active'));revealMainMenuInstant();actionBtnsFixed.style.display='flex';}
+        function openRecarga(){screenMain.classList.add('slide-out');actionBtnsFixed.style.display='none';showRecargaScreen(recargaScreen1);pushScreenState('recarga');}
+        function closeRecarga(){[recargaScreen1,recargaScreen2,recargaScreen3,recargaSuccessScreen].forEach(s=>s.classList.remove('active'));revealMainMenuInstant();actionBtnsFixed.style.display='flex';popScreenState();}
 
         document.getElementById('btnRecargarCelular').addEventListener('click',openRecarga);
         document.getElementById('recargaBackBtn1').addEventListener('click',closeRecarga);
