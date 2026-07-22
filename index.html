@@ -4276,7 +4276,12 @@
         }
 
         function closeAllMovements() { document.getElementById('screen-all-movements').classList.remove('active'); if (movementsOpen) renderMovements(); popScreenState(); }
-        function viewHistoryReceiptFromAll(index) { closeAllMovements(); viewHistoryReceipt(index); }
+        function viewHistoryReceiptFromAll(index) {
+            // Se oculta la pantalla de movimientos sin tocar el historial aquí
+            // (evita el mismo choque entre history.back() y pushState()).
+            document.getElementById('screen-all-movements').classList.remove('active');
+            viewHistoryReceipt(index);
+        }
 
         // ========== RECEIPT SCALE — COVER (sin franjas en ningún lado) ==========
         const receiptScreen = document.getElementById('screen-receipt');
@@ -4885,7 +4890,10 @@
             `;
 
             function ctGoToYapear(digits, name, source) {
-                closeContacts();
+                // No cerramos "contacts" del historial aquí (evita choque entre
+                // history.back() y history.pushState() en el mismo instante).
+                // Solo se oculta visualmente; queda debajo de Yapear en la pila.
+                screenContacts.classList.remove('slide-in');
                 openYapearLocked(digits, name, source);
             }
 
@@ -5100,7 +5108,7 @@
                 const name = ctQrInputNombre.value.trim();
                 if (!name) { ctQrInputNombre.focus(); return; }
                 ctCloseQrSheet();
-                closeContacts();
+                screenContacts.classList.remove('slide-in');
                 openYapearQR(name);
             });
 
