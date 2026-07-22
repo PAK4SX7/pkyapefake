@@ -4634,7 +4634,11 @@
         }
 
         function closeLayerByName(name) {
-            if (name === 'yapear') closeYapear();
+            if (name === 'yapear') {
+                const beneath = openLayerStack[openLayerStack.length - 1];
+                if (beneath === 'contacts') backToContactsFromYapear();
+                else closeYapear();
+            }
             else if (name === 'contacts') closeContacts();
             else if (name === 'allMovements') closeAllMovements();
             else if (name === 'perfil') closePerfil();
@@ -4936,8 +4940,9 @@
                 const justCameBack = ctWasShowingNewNumber;
                 ctWasShowingNewNumber = false;
 
-                ctNuevoNumeroSection.style.display = '';
-                ctTopDivider.style.display = '';
+                const hideNuevoNumero = isNineDigitNumber && exactPhoneExists;
+                ctNuevoNumeroSection.style.display = hideNuevoNumero ? 'none' : '';
+                ctTopDivider.style.display = hideNuevoNumero ? 'none' : '';
                 ctSectionTitle.style.display = '';
                 if (justCameBack) {
                     [ctNuevoNumeroSection, ctTopDivider, ctSectionTitle, ctContactList, ctEmptyState].forEach(el => {
