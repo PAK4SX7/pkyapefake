@@ -850,7 +850,11 @@
             border: none;
             color: #4a4a4a;
             font-weight: bold;
+            flex-shrink: 0;
         }
+        .yapear-icon-btn svg { width: 20px; height: 20px; }
+        .yapear-header-left { display: flex; align-items: center; gap: 10px; }
+        .yapear-header-title { font-size: 20px; font-weight: bold; color: #1a1a1a; }
         .recipient-section {
             display: flex;
             flex-direction: column;
@@ -3528,7 +3532,18 @@
     <!-- YAPEAR SCREEN -->
     <div id="screen-yapear">
         <div class="yapear-container">
-            <div class="yapear-header"><button class="yapear-icon-btn" id="btnBack">‹</button><div>Yapear a</div><button class="yapear-icon-btn" id="btnClose">&times;</button></div>
+            <div class="yapear-header">
+                <div class="yapear-header-left">
+                    <button class="yapear-icon-btn" id="btnBack">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#4a4a4a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </button>
+                    <div class="yapear-header-title">Yapear a</div>
+                </div>
+                <button class="yapear-icon-btn" id="btnClose">&times;</button>
+            </div>
             <div class="recipient-section"><input type="text" class="recipient-name" id="recipientName" placeholder="Nombre"><div class="name-skeleton" id="nameSkeleton"></div><div class="locked-phone-display" id="lockedPhoneDisplay">*** *** 000</div></div>
             <div class="amount-section"><div class="amount-wrapper"><span class="currency-symbol" id="currencySymbol">S/</span><input type="text" class="amount-input" id="amountInput" placeholder="0" inputmode="decimal"><span class="amount-ghost" id="amountGhost"></span></div><div class="error-message" id="errorMessage">El monto ingresado no es válido</div></div>
             <div class="input-section" id="inputSectionYapear"><input type="tel" class="number-input" id="phoneInput" placeholder="Agregar número" maxlength="3"></div>
