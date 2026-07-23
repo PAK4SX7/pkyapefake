@@ -5797,9 +5797,14 @@
                 hideOfflineScreen();
                 reloadHeaderIcons();
                 if (window.showUnifiedLoading && window.hideUnifiedLoading) {
-                    showUnifiedLoading('Verificando conexión');
-                    const delay = 1000 + Math.random() * 1000;
-                    setTimeout(hideUnifiedLoading, delay);
+                    showUnifiedLoading('Verificando tu conexión a internet');
+                    const label = document.getElementById('unifiedLoadingLabel');
+                    label.style.fontSize = '17px';
+                    const delay = 3000 + Math.random() * 2000;
+                    setTimeout(function() {
+                        hideUnifiedLoading();
+                        label.style.fontSize = '';
+                    }, delay);
                 }
                 if (window._licenseCheck) window._licenseCheck();
             });
