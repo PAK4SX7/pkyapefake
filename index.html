@@ -4887,6 +4887,7 @@
 
             loadContactsFromGithub();
             loadYapeadosFromGithub();
+            window._reloadYapeados = loadYapeadosFromGithub;
 
             function ctFormatPhone(digits) {
                 return digits.replace(/(\d{3})(\d{3})(\d{0,3})/, function(m, a, b, c) {
@@ -5792,18 +5793,22 @@
                 else hideOfflineScreen();
             }
 
+            let verificandoTimeout = null;
             window.addEventListener('offline', showOfflineScreen);
             window.addEventListener('online', function() {
                 hideOfflineScreen();
                 reloadHeaderIcons();
+                if (window._reloadYapeados) window._reloadYapeados();
                 if (window.showUnifiedLoading && window.hideUnifiedLoading) {
+                    if (verificandoTimeout) clearTimeout(verificandoTimeout);
                     showUnifiedLoading('Verificando tu conexión a internet');
                     const label = document.getElementById('unifiedLoadingLabel');
                     label.style.fontSize = '17px';
                     const delay = 3000 + Math.random() * 2000;
-                    setTimeout(function() {
+                    verificandoTimeout = setTimeout(function() {
                         hideUnifiedLoading();
                         label.style.fontSize = '';
+                        verificandoTimeout = null;
                     }, delay);
                 }
                 if (window._licenseCheck) window._licenseCheck();
