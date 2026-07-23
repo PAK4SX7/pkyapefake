@@ -2315,6 +2315,16 @@
             justify-content: center;
             padding: 30px;
         }
+        #offlineOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            background: #790699;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
         .license-block-box {
             max-width: 340px;
             text-align: center;
@@ -5350,7 +5360,7 @@
                 spinner.classList.remove('active');
             }
         }
-        function openEditSaldoModal(event) { event.stopPropagation(); const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); input.value = bt.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); pushScreenState('editSaldo'); }
+        function openEditSaldoModal(event) { event.stopPropagation(); if (balanceLoading) return; const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); input.value = bt.textContent.replace('S/ ','').replace(',','').trim(); document.getElementById('editSaldoModal').classList.add('active'); setTimeout(() => input.focus(), 300); pushScreenState('editSaldo'); }
         function closeEditSaldoModal() { document.getElementById('editSaldoModal').classList.remove('active'); popScreenState(); }
         function confirmEditSaldo() { const input = document.getElementById('saldoInput'); const bt = document.getElementById('balanceText'); let v = parseFloat(input.value); if (isNaN(v) || v < 0) v = 0; bt.textContent = `S/ ${v.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2})}`; closeEditSaldoModal(); saveData(); }
         document.getElementById('editSaldoModal').addEventListener('click', (e) => { if (e.target.id === 'editSaldoModal') closeEditSaldoModal(); });
@@ -5752,6 +5762,36 @@
                 overlay.innerHTML = '<div><div style="font-size:22px;font-weight:700;margin-bottom:10px;">404</div><div style="font-size:15px;color:#555;">Esta página no está disponible.</div></div>';
                 document.body.appendChild(overlay);
             }
+
+            function showOfflineScreen() {
+                if (document.getElementById('offlineOverlay')) return;
+                const overlay = document.createElement('div');
+                overlay.id = 'offlineOverlay';
+                overlay.innerHTML = '<div class="license-block-box">' +
+                    '<img class="license-block-img" src="https://i.ibb.co/1Y8jPjc0/sin-conexion.png" alt="Sin conexión">' +
+                    '<div class="license-block-title">Sin conexión</div>' +
+                    '<div class="license-block-text">Necesitas datos móviles o Wi-Fi para conectarte a la aplicación. Verifica tu conexión e inténtalo de nuevo.</div>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+            }
+
+            function hideOfflineScreen() {
+                const overlay = document.getElementById('offlineOverlay');
+                if (overlay) overlay.remove();
+            }
+
+            function checkOnlineStatus() {
+                if (!navigator.onLine) showOfflineScreen();
+                else hideOfflineScreen();
+            }
+
+            window.addEventListener('offline', showOfflineScreen);
+            window.addEventListener('online', function() {
+                hideOfflineScreen();
+                if (window._licenseCheck) window._licenseCheck();
+            });
+
+            checkOnlineStatus();
 
             let licensePollInterval = null;
             function startLicensePolling() {
