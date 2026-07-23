@@ -3460,7 +3460,7 @@
 
     <!-- UNIFIED LOADING -->
     <div id="unifiedLoadingOverlay" class="unified-loading-overlay">
-        <div class="unified-loading-box">
+        <div class="unified-loading-box" id="unifiedLoadingBox">
             <div class="unified-loading-spinner"></div>
             <div class="unified-loading-label" id="unifiedLoadingLabel"> </div>
         </div>
@@ -5801,13 +5801,19 @@
                 if (window._reloadYapeados) window._reloadYapeados();
                 if (window.showUnifiedLoading && window.hideUnifiedLoading) {
                     if (verificandoTimeout) clearTimeout(verificandoTimeout);
-                    showUnifiedLoading('Verificando tu conexión a internet');
+                    showUnifiedLoading(' ');
                     const label = document.getElementById('unifiedLoadingLabel');
+                    const box = document.getElementById('unifiedLoadingBox');
+                    label.innerHTML = 'Verificando tu conexión a<br>Internet';
                     label.style.fontSize = '17px';
+                    box.style.width = '300px';
+                    box.style.height = 'auto';
                     const delay = 3000 + Math.random() * 2000;
                     verificandoTimeout = setTimeout(function() {
                         hideUnifiedLoading();
                         label.style.fontSize = '';
+                        box.style.width = '';
+                        box.style.height = '';
                         verificandoTimeout = null;
                     }, delay);
                 }
