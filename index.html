@@ -5804,14 +5804,16 @@
                     showUnifiedLoading(' ');
                     const label = document.getElementById('unifiedLoadingLabel');
                     const box = document.getElementById('unifiedLoadingBox');
-                    label.innerHTML = 'Verificando tu conexión a<br>Internet';
+                    label.innerHTML = 'Verificando tu conexión a<br>internet';
                     label.style.fontSize = '17px';
-                    box.style.width = '300px';
+                    label.style.textAlign = 'center';
+                    box.style.width = '260px';
                     box.style.height = 'auto';
                     const delay = 3000 + Math.random() * 2000;
                     verificandoTimeout = setTimeout(function() {
                         hideUnifiedLoading();
                         label.style.fontSize = '';
+                        label.style.textAlign = '';
                         box.style.width = '';
                         box.style.height = '';
                         verificandoTimeout = null;
