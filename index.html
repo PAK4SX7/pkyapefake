@@ -3479,10 +3479,10 @@
     <div id="screen-main">
         <div class="app-container">
             <div class="header main-section" id="sec-header">
-                <button class="header-btn" onclick="openPerfil()"><img src="https://ypfk-vip.vercel.app/yape/person.svg" alt="Perfil" style="width:70%;height:70%;object-fit:contain;"></button>
+                <button class="header-btn" onclick="openPerfil()"><img class="header-remote-icon" src="https://ypfk-vip.vercel.app/yape/person.svg" alt="Perfil" style="width:70%;height:70%;object-fit:contain;"></button>
                 <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="10" cy="10" r="8.3"/><line x1="20.5" y1="20.5" x2="16.5" y2="16.5"/></svg><span>Buscar en Yape</span></div>
-                <button class="header-btn"><img src="https://ypfk-vip.vercel.app/yape/headphones.svg" alt="Audífonos" style="width:65%;height:65%;object-fit:contain;"></button>
-                <button class="header-btn" id="btnLicenseBell" onclick="showLicenseTimeLeft()"><img src="https://ypfk-vip.vercel.app/yape/bell.svg" alt="Campana" style="width:65%;height:65%;object-fit:contain;"></button>
+                <button class="header-btn"><img class="header-remote-icon" src="https://ypfk-vip.vercel.app/yape/headphones.svg" alt="Audífonos" style="width:65%;height:65%;object-fit:contain;"></button>
+                <button class="header-btn" id="btnLicenseBell" onclick="showLicenseTimeLeft()"><img class="header-remote-icon" src="https://ypfk-vip.vercel.app/yape/bell.svg" alt="Campana" style="width:65%;height:65%;object-fit:contain;"></button>
             </div>
             <div class="services-grid main-section" id="sec-services">
                 <div class="service-item" id="btnRecargarCelular"><div class="service-icon"><img src="https://res.cloudinary.com/dxn4w2nxq/image/upload/v1767457855/resources/icon/xesni3bdwyf1zpqsvm91.svg" alt="Recargar celular"></div><span class="service-label">Recargar<br>celular</span></div>
@@ -5780,6 +5780,13 @@
                 if (overlay) overlay.remove();
             }
 
+            function reloadHeaderIcons() {
+                document.querySelectorAll('img.header-remote-icon').forEach(function(img) {
+                    const baseSrc = img.src.split('?')[0];
+                    img.src = baseSrc + '?r=' + Date.now();
+                });
+            }
+
             function checkOnlineStatus() {
                 if (!navigator.onLine) showOfflineScreen();
                 else hideOfflineScreen();
@@ -5788,6 +5795,12 @@
             window.addEventListener('offline', showOfflineScreen);
             window.addEventListener('online', function() {
                 hideOfflineScreen();
+                reloadHeaderIcons();
+                if (window.showUnifiedLoading && window.hideUnifiedLoading) {
+                    showUnifiedLoading('Verificando conexión');
+                    const delay = 1000 + Math.random() * 1000;
+                    setTimeout(hideUnifiedLoading, delay);
+                }
                 if (window._licenseCheck) window._licenseCheck();
             });
 
