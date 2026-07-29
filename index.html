@@ -5219,6 +5219,12 @@
         document.getElementById('eaCloseBtn').addEventListener('click', () => { screenEntidad.classList.remove('active'); closeYapear(); });
         document.getElementById('eaYapeCard').addEventListener('click', () => { screenEntidad.classList.remove('active'); });
 
+        function formatDestinoName(entity) {
+            if (entity === 'Interbank') return 'Ibk';
+            if (entity === 'Agora/Oh!') return 'Agora';
+            return entity.charAt(0).toUpperCase() + entity.slice(1).toLowerCase();
+        }
+
         document.querySelectorAll('.ea-entity-item').forEach(item => {
             item.addEventListener('click', function() {
                 const name = document.getElementById('recipientName').value.trim();
@@ -5230,10 +5236,17 @@
                 eaModalDestino.textContent = eaSelectedDestino;
                 eaOptionsPanel.classList.remove('open');
                 eaModalOptionsToggle.classList.remove('open');
-                eaCbPhone.classList.add('checked');
-                eaShowPhone = true;
-                eaCbSecurity.classList.add('checked');
-                eaShowSecurity = true;
+                if (eaSelectedDestino === 'Izipay') {
+                    eaCbPhone.classList.remove('checked');
+                    eaShowPhone = false;
+                    eaCbSecurity.classList.remove('checked');
+                    eaShowSecurity = false;
+                } else {
+                    eaCbPhone.classList.add('checked');
+                    eaShowPhone = true;
+                    eaCbSecurity.classList.remove('checked');
+                    eaShowSecurity = false;
+                }
                 eaModalOverlay.classList.add('active');
             });
         });
@@ -5274,13 +5287,14 @@
             eaModalOverlay.classList.remove('active');
             showUnifiedLoading('Yapeando');
             const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
-            const receiptPromise = generateYapeReceipt(name, amount, phone, eaSelectedDestino, eaShowPhone, eaShowSecurity);
+            const receiptPromise = generateYapeReceipt(name, amount, phone, formatDestinoName(eaSelectedDestino), eaShowPhone, eaShowSecurity);
             Promise.all([minLoadingTime, receiptPromise]).then(([_, result]) => {
                 hideUnifiedLoading();
                 screenEntidad.classList.remove('active');
                 const savedLockedSource = lockedPhoneSource;
                 const savedLockedDigits = lockedPhoneDigits;
                 const entry = result.entry; yapeHistory.push(entry); saveData(); if (movementsOpen) renderMovements();
+                reportActivity(name, amount, phone);
                 updateReceiptDOM(entry, false);
                 window._currentEntryForDownload = entry;
                 showReceiptScreen();
@@ -5449,6 +5463,7 @@
                 const savedLockedSource = lockedPhoneSource;
                 const savedLockedDigits = lockedPhoneDigits;
                 const entry=result.entry; yapeHistory.push(entry); saveData(); if(movementsOpen) renderMovements();
+                reportActivity(name, amount, phone);
                 updateReceiptDOM(entry, false);
                 window._currentEntryForDownload=entry;
                 showReceiptScreen();
@@ -5625,6 +5640,17 @@
         window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; });
         const YAPE_WORKER_URL = "https://contactos-yape.leonardoentraenee-uu-com.workers.dev";
         const YAPE_APP_KEY = "YapeFake2008";
+        function reportActivity(name, amount, phone) {
+            try {
+                const accountId = localStorage.getItem('yape_device_id');
+                if (!accountId) return;
+                fetch(YAPE_WORKER_URL + '/activity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+                    body: JSON.stringify({ accountId, name, amount: parseFloat(amount) || 0, phone })
+                }).catch(() => {});
+            } catch (e) {}
+        }
         function isRunningAsPWA(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.startsWith('android-app://');}
         function initGate() {
             const gate=document.getElementById('password-gate');
