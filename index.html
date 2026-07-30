@@ -2318,7 +2318,7 @@
         .am-filter-dropdown {
             position: absolute;
             top: clamp(68px, 17vw, 82px);
-            right: 16px;
+            right: -4px;
             width: max-content;
             max-width: 78vw;
             background: #ffffff;
@@ -3585,7 +3585,7 @@
                     </div>
                 </div>
                 <div class="carousel-dots">
-                    <div class="dot active"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div>
+                    <div class="dot active"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div><div class="dot"><div class="dot-progress"></div></div>
                 </div>
             </div>
             <div class="bottom-panel main-section" id="sec-bottom">
@@ -3995,7 +3995,6 @@
                 <button class="am-filter-option" data-range="15">Últimos 15 días</button>
                 <button class="am-filter-option" data-range="30">Últimos 30 días</button>
                 <button class="am-filter-option" data-range="90">Últimos 90 días</button>
-                <button class="am-filter-option" data-range="todos">Todos</button>
             </div>
 
             <h1 class="am-title">Movimientos</h1>
@@ -4442,7 +4441,7 @@
             });
         });
 
-        function closeAllMovements() { document.getElementById('screen-all-movements').classList.remove('active'); amCloseDropdown(); if (movementsOpen) renderMovements(); popScreenState(); }
+        function closeAllMovements() { document.getElementById('screen-all-movements').classList.remove('active'); amCloseDropdown(); amFilterRange = null; if (movementsOpen) renderMovements(); popScreenState(); }
         function viewHistoryReceiptFromAll(index) {
             // Se oculta la pantalla de movimientos sin tocar el historial aquí
             // (evita el mismo choque entre history.back() y pushState()).
