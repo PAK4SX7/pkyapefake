@@ -907,9 +907,8 @@
         .name-skeleton {
             display: none;
             width: 150px;
-            max-width: 55%;
             height: 15px;
-            border-radius: 999px;
+            border-radius: 6px;
             background: linear-gradient(90deg, #EDEDF2 25%, #F7F7FA 37%, #EDEDF2 63%);
             background-size: 400% 100%;
             animation: nameSkeletonShimmer 1.4s ease-in-out infinite;
@@ -4908,8 +4907,7 @@
             nameInput.value = '';
             nameInput.placeholder = '';
             nameInput.style.visibility = 'hidden';
-            const skeletonWidth = Math.min(190, Math.max(70, ((name || '').length || 8) * 9));
-            nameSkeleton.style.width = skeletonWidth + 'px';
+            nameSkeleton.style.width = '150px';
             nameSkeleton.classList.add('visible');
             lockedDisplay.style.display = 'none';
             lockedDisplay.textContent = '';
