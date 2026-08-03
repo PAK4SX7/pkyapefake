@@ -4605,16 +4605,34 @@
                 hideReceiptScreen();
                 openYapear();
                 resetYapearForm();
-                document.getElementById('recipientName').value = data.name || '';
-                document.getElementById('recipientName').readOnly = true;
+                const nameInput = document.getElementById('recipientName');
+                const nameSkeleton = document.getElementById('nameSkeleton');
+                const lockedDisplay = document.getElementById('lockedPhoneDisplay');
                 document.getElementById('phoneInput').value = last3;
                 document.getElementById('inputSectionYapear').style.display = 'none';
-                const lockedDisplay = document.getElementById('lockedPhoneDisplay');
-                lockedDisplay.textContent = '*** *** ' + last3;
-                lockedDisplay.style.display = 'block';
                 lockedPhoneDigits = last3;
                 lockedPhoneSource = 'history';
-                checkOtrosBancosState();
+
+                // Estado "cargando": mismo skeleton que al elegir un contacto guardado.
+                nameInput.value = '';
+                nameInput.readOnly = true;
+                nameInput.placeholder = '';
+                nameInput.style.visibility = 'hidden';
+                nameSkeleton.style.width = '150px';
+                nameSkeleton.classList.add('visible');
+                lockedDisplay.style.display = 'none';
+                lockedDisplay.textContent = '';
+
+                const loadingTime = 600 + Math.random() * 900;
+                setTimeout(() => {
+                    nameSkeleton.classList.remove('visible');
+                    nameInput.style.visibility = 'visible';
+                    nameInput.value = data.name || '';
+                    nameInput.placeholder = 'Nombre';
+                    lockedDisplay.textContent = '*** *** ' + last3;
+                    lockedDisplay.style.display = 'block';
+                    checkOtrosBancosState();
+                }, loadingTime);
             }, 150);
         });
 
@@ -5986,6 +6004,7 @@
                     label.style.textAlign = 'center';
                     box.style.width = '260px';
                     box.style.height = 'auto';
+                    box.style.padding = '32px 24px 28px';
                     const delay = 3000 + Math.random() * 2000;
                     verificandoTimeout = setTimeout(function() {
                         hideUnifiedLoading();
@@ -5993,6 +6012,7 @@
                         label.style.textAlign = '';
                         box.style.width = '';
                         box.style.height = '';
+                        box.style.padding = '';
                         verificandoTimeout = null;
                     }, delay);
                 }
