@@ -5731,7 +5731,7 @@
         function launchConfetti(canvasId, fromSides = false) {
             const canvas = document.getElementById(canvasId); if (!canvas) return;
             const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            const colors = ['#7B1FA2','#AB47BC','#CE93D8','#FFD700','#FFC107','#FFEB3B','#0EC8B4','#26C6DA','#80DEEA','#F06292','#ffffff'];
+            const colors = ['#03C7B1','#D4A72C'];
             const cx = canvas.width / 2; const cy = canvas.height / 2;
             const particles = []; const particleCount = fromSides ? 320 : 280;
             for (let i = 0; i < particleCount; i++) {
@@ -5758,7 +5758,7 @@
             const frontCtx = frontCanvas.getContext('2d');
             const backCtx = backCanvas.getContext('2d');
             [frontCanvas, backCanvas].forEach(c => { c.width = window.innerWidth; c.height = window.innerHeight; });
-            const colors = ['#7B1FA2','#AB47BC','#CE93D8','#FFD700','#FFC107','#FFEB3B','#0EC8B4','#26C6DA','#80DEEA','#F06292','#ffffff'];
+            const colors = ['#03C7B1','#D4A72C'];
             const cx = frontCanvas.width / 2; const cy = frontCanvas.height / 2;
             const particles = []; const particleCount = fromSides ? 320 : 280;
             for (let i = 0; i < particleCount; i++) {
