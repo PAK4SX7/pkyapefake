@@ -2365,12 +2365,15 @@
             inset: 0;
             z-index: 99999;
             background: #790699;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 0;
             padding: 40px 30px;
+        }
+        #password-gate.visible {
+            display: flex;
         }
         #password-gate.gone {
             display: none;
@@ -5625,27 +5628,10 @@ button{
         function finishAuthAndEnterApp() {
             hideAllAuthScreens();
             document.getElementById('password-gate').classList.add('gone');
-            if (window._licenseCheck) {
-                window._licenseCheck().then(function(data) {
-                    if (!data || data.blocked || data.notRegistered || data.userBlocked) {
-                        // Sin días o bloqueado → pantalla de bloqueo directa, sin loading
-                        return;
-                    }
-                    // Tiene días → loading silencioso 2-3s
-                    const silentDelay = 2000 + Math.random() * 1000;
-                    showUnifiedLoading(' ');
-                    setTimeout(function() { hideUnifiedLoading(); }, silentDelay);
-                }).catch(function() {
-                    // Error de red → loading silencioso igual
-                    const silentDelay = 2000 + Math.random() * 1000;
-                    showUnifiedLoading(' ');
-                    setTimeout(function() { hideUnifiedLoading(); }, silentDelay);
-                });
-            } else {
-                const silentDelay = 2000 + Math.random() * 1000;
-                showUnifiedLoading(' ');
-                setTimeout(function() { hideUnifiedLoading(); }, silentDelay);
-            }
+            // Cargar secciones del menú principal y luego verificar licencia
+            loadSectionsSequentially(function() {
+                if (window._licenseCheck) window._licenseCheck();
+            });
         }
 
         // ---- login.html ----
@@ -7672,7 +7658,7 @@ function shuffleDigitKeys() {
             const gate = document.getElementById('password-gate');
 
             if (!isRunningAsPWA()) {
-                gate.style.display = 'flex';
+                gate.classList.add('visible');
                 return;
             }
             gate.classList.add('gone');
