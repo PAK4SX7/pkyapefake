@@ -5634,10 +5634,12 @@ button{
     document.getElementById(id).classList.add('active');
     window.scrollTo(0, 0);
   }
+  window.showScreen = showScreen;
 
   function goToScreen(id){
     showScreen(id);
   }
+  window.goToScreen = goToScreen;
 
   const overlay = document.getElementById('login-loading-overlay');
   function showLoading(){ overlay.classList.add('active'); }
