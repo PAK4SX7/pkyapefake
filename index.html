@@ -3502,12 +3502,1011 @@
             font-size: clamp(0.95rem, 4vw, 1.05rem);
             line-height: 1.9;
         }
+        .close-account-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99997;
+            padding: 24px;
+        }
+        .close-account-overlay.active { display: flex; }
+        .close-account-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 26px 22px 20px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .close-account-title { font-size: 18px; font-weight: 700; color: #241a2e; margin-bottom: 6px; }
+        .close-account-text { font-size: 13.5px; color: #6b6478; margin-bottom: 16px; line-height: 1.4; }
+        .close-account-input {
+            width: 100%;
+            border: 1.5px solid #e7e2ee;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 8px;
+            margin-bottom: 6px;
+            outline: none;
+        }
+        .close-account-input:focus { border-color: #790699; }
+        .close-account-error { color: #e05353; font-size: 12.5px; min-height: 16px; margin-bottom: 10px; }
+        .close-account-buttons { display: flex; gap: 10px; }
+        .close-account-btn { flex: 1; padding: 11px; border-radius: 9px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .close-account-btn.cancel { background: #f1eef5; color: #4a4458; }
+        .close-account-btn.confirm { background: #790699; color: #fff; }
+        .close-account-btn:active { opacity: 0.85; }
+
         #screen-perfil .mp-info-block p {
             color: var(--mp-text-main);
         }
         #screen-perfil .mp-info-block strong {
             font-weight: 700;
         }
+
+        /* ===== Pantallas de autenticación (login / crear clave / ingresar clave) ===== */
+        .auth-wrapper-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99998;
+            display: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .auth-wrapper-screen.active { display: block; }
+
+/* ---- login.html ---- */
+  :root{
+    --purple-bg: #7B1FA2;
+    --purple-bg-2: #7A1E9E;
+    --teal: #17C6B5;
+    --teal-btn: #1BC7B6;
+    --pink-mascot: #F0555A;
+    --pink-mascot-dark: #D8474C;
+    --pink-mascot-darker: #C63E43;
+    --secondary-btn: #9B5FA8;
+    --text-light: #E4C9EA;
+    --white: #FFFFFF;
+    --input-bg: rgba(255,255,255,0.10);
+    --input-border: rgba(255,255,255,0.35);
+  }
+
+  *{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body{
+    height: 100%;
+    width: 100%;
+  }
+
+  body{
+    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+    background: radial-gradient(ellipse at 50% 38%, #8A24AE 0%, #7B1FA2 55%, #6E1A93 100%);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    overflow-x: hidden;
+  }
+
+  /* App wrapper holds all screens; only the active one is displayed */
+  .authapp{
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .screen{
+    width: 100%;
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    position: relative;
+    padding: clamp(16px, 5vw, 32px) clamp(20px, 6vw, 40px);
+    padding-bottom: clamp(24px, 6vw, 40px);
+  }
+
+  .screen.active{
+    display: flex;
+  }
+
+  /* Top bar / help icon */
+  .top-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: clamp(6px, 2vh, 14px);
+  }
+
+  .top-bar.end-only{
+    justify-content: flex-end;
+  }
+
+  .authback-btn{
+    width: clamp(40px, 10vw, 48px);
+    height: clamp(40px, 10vw, 48px);
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.12);
+    color: var(--white);
+    font-size: clamp(22px, 6vw, 26px);
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .help-icon{
+    width: clamp(34px, 9vw, 42px);
+    height: clamp(34px, 9vw, 42px);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(16px, 4.2vw, 20px);
+    font-weight: 700;
+    color: var(--white);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Mascot illustration area */
+  .mascot-wrap{
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #screen-login .mascot-wrap{
+    margin-top: clamp(4px, 2vh, 16px);
+    margin-bottom: clamp(12px, 3vh, 24px);
+  }
+
+  #screen-crear .mascot-wrap,
+  #screen-ya-tengo .mascot-wrap{
+    margin-top: clamp(2px, 1.5vh, 10px);
+    margin-bottom: clamp(10px, 2.5vh, 18px);
+  }
+
+  .mascot-glow{
+    position: absolute;
+    width: 92%;
+    max-width: 380px;
+    aspect-ratio: 1.1 / 1;
+    background: radial-gradient(ellipse at center, rgba(150,50,180,0.55) 0%, rgba(123,31,162,0) 70%);
+    border-radius: 50%;
+    z-index: 0;
+  }
+
+  #screen-crear .mascot-glow,
+  #screen-ya-tengo .mascot-glow{
+    width: 80%;
+    max-width: 300px;
+  }
+
+  .mascot-img{
+    position: relative;
+    z-index: 1;
+    width: min(78vw, 300px);
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  #screen-crear .mascot-img{
+    width: min(48vw, 190px);
+  }
+
+  #screen-ya-tengo .mascot-img{
+    width: min(60vw, 240px);
+  }
+
+  /* Text block */
+  .headline{
+    font-size: clamp(24px, 7vw, 32px);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--white);
+    text-align: left;
+    margin-bottom: clamp(14px, 3.5vw, 20px);
+    letter-spacing: -0.3px;
+  }
+
+  #screen-crear .headline,
+  #screen-ya-tengo .headline{
+    font-size: clamp(22px, 6.4vw, 28px);
+    line-height: 1.2;
+    margin-bottom: clamp(6px, 2vw, 10px);
+  }
+
+  .subtext{
+    font-size: clamp(14px, 4vw, 17px);
+    line-height: 1.5;
+    color: var(--text-light);
+    font-weight: 500;
+    margin-bottom: clamp(20px, 5vh, 36px);
+  }
+
+  .subtext p{
+    margin: 0;
+  }
+
+  #screen-crear .subtext{
+    font-size: clamp(13px, 3.8vw, 16px);
+    margin-bottom: clamp(18px, 4vh, 28px);
+  }
+
+  #screen-ya-tengo .subtext{
+    font-size: clamp(13px, 3.8vw, 16px);
+    margin-bottom: clamp(20px, 4.5vh, 32px);
+  }
+
+  /* Form */
+  .form-group{
+    margin-bottom: clamp(14px, 3.5vw, 20px);
+  }
+
+  .form-label{
+    display: block;
+    font-size: clamp(12px, 3.4vw, 14px);
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 8px;
+  }
+
+  .form-input{
+    width: 100%;
+    padding: clamp(13px, 3.6vw, 16px) 14px;
+    border-radius: 6px;
+    border: 1.5px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--white);
+    font-size: clamp(14px, 4vw, 16px);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .form-input::placeholder{
+    color: rgba(255,255,255,0.5);
+  }
+
+  .form-input:focus{
+    border-color: var(--teal-btn);
+    background: rgba(255,255,255,0.14);
+  }
+
+  .password-wrap{
+    position: relative;
+  }
+
+  .toggle-pass{
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: clamp(11px, 3vw, 13px);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .hint{
+    font-size: clamp(11px, 3vw, 13px);
+    color: rgba(228,201,234,0.75);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* Buttons */
+  .authbtn-group{
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 3vw, 16px);
+    margin-top: auto;
+  }
+
+  #screen-crear .authbtn-group,
+  #screen-ya-tengo .authbtn-group{
+    padding-top: clamp(16px, 4vh, 28px);
+  }
+
+  .authbtn{
+    width: 100%;
+    padding: clamp(15px, 4vw, 18px) 20px;
+    border-radius: 6px;
+    border: none;
+    font-size: clamp(15px, 4.2vw, 18px);
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.08s ease, filter 0.15s ease, opacity 0.15s ease;
+  }
+
+  .authbtn:active{
+    transform: scale(0.98);
+  }
+
+  .authbtn-primary{
+    background: var(--teal-btn);
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px rgba(23, 198, 181, 0.35);
+  }
+
+  .authbtn-primary:hover{
+    filter: brightness(1.05);
+  }
+
+  .authbtn-primary:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .authbtn-secondary{
+    background: rgba(255,255,255,0.18);
+    color: #FFFFFF;
+  }
+
+  .authbtn-secondary:hover{
+    background: rgba(255,255,255,0.24);
+  }
+
+  /* Responsive tweaks for very small / very large screens */
+  @media (max-height: 620px){
+    #screen-login .mascot-img{
+      width: min(55vw, 220px);
+    }
+    #screen-login .mascot-wrap{
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+    #screen-login .headline{
+      font-size: clamp(20px, 6vw, 26px);
+      margin-bottom: 10px;
+    }
+    #screen-login .subtext{
+      margin-bottom: 16px;
+    }
+  }
+
+  @media (max-height: 640px){
+    #screen-crear .mascot-img{
+      width: min(34vw, 130px);
+    }
+    #screen-crear .mascot-wrap{
+      margin-bottom: 8px;
+    }
+    #screen-crear .headline{
+      font-size: clamp(18px, 5.4vw, 22px);
+    }
+    #screen-crear .subtext{
+      margin-bottom: 14px;
+    }
+    #screen-crear .form-group{
+      margin-bottom: 12px;
+    }
+
+    #screen-ya-tengo .mascot-img{
+      width: min(42vw, 160px);
+    }
+    #screen-ya-tengo .mascot-wrap{
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    #screen-ya-tengo .headline{
+      font-size: clamp(18px, 5.4vw, 22px);
+    }
+    #screen-ya-tengo .subtext{
+      margin-bottom: 16px;
+    }
+  }
+
+  @media (min-width: 480px){
+    .screen{
+      padding-top: 32px;
+    }
+  }
+
+  @media (min-height: 850px){
+    #screen-login .authbtn-group{
+      margin-bottom: 4vh;
+    }
+  }
+
+  /* Overlay de carga flotante */
+  .loading-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 20px;
+  }
+
+  .loading-overlay.active{
+    display: flex;
+  }
+
+  .loading-card{
+    background: var(--white);
+    border-radius: 8px;
+    padding: clamp(36px, 9vw, 48px) clamp(36px, 10vw, 48px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 240px;
+  }
+
+  .loading-spinner{
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid #17C6B5;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin{
+    to{ transform: rotate(360deg); }
+  }
+/* ---- crear_clave.html ---- */
+  :root {
+    --purple-bg: #790599;
+    --purple-bg-2: #650780;
+    --key-bg: rgba(255, 255, 255, 0.16);
+    --key-bg-active: rgba(255, 255, 255, 0.28);
+    --text-white: #FFFFFF;
+    --text-subtitle: #D9BEE8;
+    --dot-inactive: rgba(255, 255, 255, 0.35);
+    --lock-purple-1: #B983E0;
+    --lock-purple-2: #9A4FD1;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(180deg, var(--purple-bg) 0%, var(--purple-bg-2) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .crear-screen {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: linear-gradient(180deg, var(--purple-bg) 0%, var(--purple-bg-2) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: clamp(12px, 3vh, 28px) 24px clamp(16px, 3vh, 24px);
+    position: relative;
+  }
+
+  /* ---------- Lock icon ---------- */
+  .lock-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: clamp(16px, 4vh, 40px);
+    margin-bottom: clamp(6px, 1.5vh, 14px);
+  }
+
+  .lock-icon {
+    width: clamp(200px, 52vw, 250px);
+    height: auto;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.25));
+  }
+
+  /* ---------- Titles ---------- */
+  .title {
+    font-size: clamp(22px, 6.5vw, 28px);
+    font-weight: 800;
+    color: var(--text-white);
+    text-align: center;
+    letter-spacing: -0.2px;
+  }
+
+  .subtitle {
+    font-size: clamp(15px, 4vw, 17px);
+    font-weight: 400;
+    color: var(--text-subtitle);
+    margin-top: -2px;
+    text-align: center;
+  }
+
+  .instruction {
+    font-size: clamp(18px, 5vw, 21px);
+    font-weight: 700;
+    color: var(--text-white);
+    text-align: center;
+    margin-top: clamp(10px, 2.2vh, 18px);
+  }
+
+  /* ---------- PIN dots ---------- */
+  .crear-pin-dots {
+    display: flex;
+    gap: clamp(22px, 5.5vw, 30px);
+    margin-top: clamp(10px, 2.2vh, 18px);
+    transform: translateY(-10px);
+  }
+
+  .authpindot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--dot-inactive);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .authpindot.filled {
+    background: var(--text-white);
+    transform: scale(1.05);
+  }
+
+  /* ---------- Keypad ---------- */
+  .crear-keypad {
+    width: 100%;
+    max-width: 340px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(8px, 2vh, 16px) clamp(10px, 2.6vw, 14px);
+  }
+
+  .crear-key {
+    height: clamp(50px, 7.2vh, 62px);
+    border: none;
+    border-radius: 8px;
+    background: var(--key-bg);
+    color: var(--text-white);
+    font-size: clamp(20px, 5.5vw, 26px);
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.12s ease, transform 0.08s ease;
+  }
+
+  .crear-key:active {
+    background: var(--key-bg-active);
+    transform: scale(0.96);
+  }
+
+  .crear-key.empty {
+    background: transparent;
+    cursor: default;
+  }
+
+  .crear-key.delete {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: clamp(50px, 7.2vh, 62px);
+    height: clamp(50px, 7.2vh, 62px);
+    margin: 0 auto;
+    font-size: clamp(18px, 4.5vw, 22px);
+  }
+
+  .crear-key.delete:active {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(0.96);
+  }
+
+  /* ---------- Overlay de carga ---------- */
+  .crear-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 20px;
+  }
+  .crear-loading-overlay.active { display: flex; }
+  .crear-loading-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 28px 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    min-width: 220px;
+  }
+  .crear-loading-spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid #17C6B5;
+    border-top-color: transparent;
+    animation: loadspin 0.8s linear infinite;
+  }
+  .crear-loading-text { font-weight: 700; color: #2D293D; font-size: 15px; text-align: center; }
+  @keyframes loadspin { to { transform: rotate(360deg); } }
+/* ---- ingresar_clave.html ---- */
+/* ===== Design tokens ===== */
+:root{
+  --purple-light: #760599;
+  --purple-dark:  #58037a;
+  --purple-mid:   #760599;
+  --sheet-bg:     #ffffff;
+  --key-bg:       #EDECF1;
+  --key-text:     #241a2e;
+  --title-purple: #760599;
+  --action-icon-bg: #892AA3;
+  --action-icon-bg-inner: rgba(255,255,255,0.10);
+  --ghost-icon: rgba(255,255,255,0.85);
+
+  --sheet-radius: clamp(20px, 6vw, 32px);
+  --key-radius: clamp(6px, 1.6vw, 9px);
+}
+
+*{
+  box-sizing: border-box;
+}
+
+html, body{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #1c0a24;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button{
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== Phone frame / screen ===== */
+.ingresar-screen{
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(120% 90% at 88% 14%, #9a1ac0 0%, transparent 55%),
+    linear-gradient(160deg, #8c05ad 0%, #760599 40%, #63047f 75%, #4f0367 100%);
+  overflow: hidden;
+}
+
+@media (min-width: 481px){
+  html, body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ingresar-screen{
+    min-height: 92vh;
+    max-height: 940px;
+    border-radius: 28px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  }
+}
+
+/* ===== Top purple area ===== */
+.top-area{
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(16px, 5vh, 28px) clamp(20px, 6vw, 32px) clamp(28px, 6vh, 40px);
+  gap: clamp(20px, 5vh, 36px);
+}
+
+.hero-image-wrap{
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 0;
+}
+
+.hero-image{
+  width: clamp(135px, 42vw, 220px);
+  height: auto;
+  max-height: 100%;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+}
+
+.action-row{
+  flex: 0 0 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(4px, 1.5vw, 12px);
+}
+
+.action-item{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.5vh, 16px);
+  height: 100%;
+}
+
+.authaction-btn{
+  width: clamp(52px, 13.5vw, 66px);
+  height: clamp(52px, 13.5vw, 66px);
+  border-radius: 22%;
+  background: var(--action-icon-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.authaction-btn:active{
+  transform: scale(0.93);
+  background: #7a2490;
+}
+.authaction-btn svg{
+  width: 64%;
+  height: 64%;
+}
+
+.action-label{
+  color: #fff;
+  font-weight: 600;
+  font-size: clamp(14px, 3.8vw, 17px);
+  line-height: 1.25;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+/* ===== Bottom sheet ===== */
+.sheet{
+  flex: 0 0 auto;
+  background: var(--sheet-bg);
+  border-top-left-radius: var(--sheet-radius);
+  border-top-right-radius: var(--sheet-radius);
+  padding: clamp(16px, 4vh, 26px) clamp(20px, 6vw, 30px) clamp(32px, 6.5vh, 44px);
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.18);
+}
+
+.title-slot{
+  position: relative;
+  height: clamp(34px, 8vh, 42px);
+  margin: 0 0 clamp(12px, 3vh, 18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheet-title{
+  margin: 0;
+  text-align: center;
+  color: var(--title-purple);
+  font-weight: 600;
+  font-size: clamp(21px, 5.8vw, 26px);
+  letter-spacing: -0.01em;
+  opacity: 1;
+  transform: scale(1);
+  transition: none;
+}
+
+.title-slot.has-pin .sheet-title{
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.ingresar-pin-dots{
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 7vw, 34px);
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+  transition: none;
+}
+
+.title-slot.has-pin .ingresar-pin-dots{
+  opacity: 1;
+  transform: scale(1);
+}
+
+.pin-dot{
+  width: clamp(11px, 3vw, 14px);
+  height: clamp(11px, 3vw, 14px);
+  border-radius: 50%;
+  background: #CECAD6;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.pin-dot.filled{
+  background: #2D293D;
+  transform: scale(1.25);
+}
+
+/* ===== Keypad ===== */
+.ingresar-keypad{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 2.2vw, 12px);
+}
+
+.ingresar-key{
+  aspect-ratio: 2.1 / 1;
+  border-radius: var(--key-radius);
+  background: var(--key-bg);
+  color: var(--key-text);
+  font-size: clamp(24px, 6.5vw, 32px);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.ingresar-key:active{
+  transform: scale(0.95);
+  background: #ded6ee;
+}
+
+.ingresar-key--icon{
+  background: transparent;
+  color: var(--purple-mid);
+}
+.ingresar-key--icon:active{
+  background: transparent;
+  transform: scale(0.9);
+}
+.ingresar-key--icon svg{
+  width: 74%;
+  height: 74%;
+}
+
+.ingresar-key--backspace{
+  background: transparent;
+  color: #85838c;
+}
+.ingresar-key--backspace:active{
+  background: transparent;
+  transform: scale(0.9);
+}
+.ingresar-key--backspace svg{
+  width: 78%;
+  height: 78%;
+}
+
+/* ===== Small-screen safety ===== */
+@media (max-height: 700px){
+  .action-row{
+    padding-bottom: 4px;
+  }
+}
+
+/* ===== Overlay de carga ===== */
+.ingresar-loading-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+.ingresar-loading-overlay.active{ display: flex; }
+.ingresar-loading-card{
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 28px 32px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+.ingresar-loading-spinner{
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #17C6B5;
+  border-top-color: transparent;
+  animation: loadspin 0.8s linear infinite;
+}
+.ingresar-loading-text{ font-weight: 700; color: #2D293D; font-size: 15px; text-align: center; }
+@keyframes loadspin{ to{ transform: rotate(360deg); } }
+
+/* ===== Modal clave incorrecta ===== */
+.error-modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 24px;
+}
+.error-modal.active{ display: flex; }
+.error-modal-card{
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 28px 24px 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+}
+.error-modal-title{ font-size: 18px; font-weight: 700; color: #241a2e; margin-bottom: 8px; }
+.error-modal-text{ font-size: 14px; color: #6b6478; margin-bottom: 20px; line-height: 1.4; }
+.error-modal-btn{
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #760599;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+.error-modal-btn:active{ opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -3516,13 +4515,358 @@
     <div id="password-gate">
         <div class="gate-logo"><img src="https://i.ibb.co/8D6rbBs1/Logo-de-Yape.png" alt="Yape"></div>
         <div class="gate-title">Yape</div>
-        <div class="gate-subtitle" id="gateSubtitle">Ingresa la contraseña<br>para instalar la aplicación</div>
-        <div class="gate-input-wrap" id="gateInputWrap">
-            <input class="gate-input" id="gateInput" type="password" placeholder="Contraseña" autocomplete="off" maxlength="20">
-            <button class="gate-eye" id="gateEyeBtn" onclick="toggleGateEye()">👁</button>
-        </div>
+        <div class="gate-subtitle" id="gateSubtitle">Instala la app para continuar.<br>No se puede usar desde el navegador.</div>
         <div class="gate-error" id="gateError"></div>
-        <button class="gate-btn" id="gateBtn" onclick="verifyGate()">Verificar</button>
+        <button class="gate-btn" id="gateBtn" onclick="installApp()">Instalar app</button>
+    </div>
+
+    <div id="screen-auth-login" class="auth-wrapper-screen">
+</head>
+<body>
+
+<div class="authapp">
+
+  <!-- Pantalla: Iniciar sesión -->
+  <div class="screen active" id="screen-login">
+    <button class="help-icon" aria-label="Ayuda" style="align-self:flex-end;">?</button>
+
+    <div class="mascot-wrap">
+      <div class="mascot-glow"></div>
+      <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
+    </div>
+
+    <h1 class="headline">Hola usuario, vamos a<br>iniciar sección en tu cuenta</h1>
+
+    <div class="subtext">
+      <p>Toca &quot;crear una cuenta&quot; si no tienes una.<br>
+      Toca &quot;ya tengo una cuenta&quot; si dispones de una.</p>
+    </div>
+
+    <div class="authbtn-group">
+      <button class="btn authbtn-primary" onclick="goToScreen('screen-crear')">Crear una cuenta</button>
+      <button class="btn authbtn-secondary" onclick="goToScreen('screen-ya-tengo')">Ya tengo una cuenta Yape</button>
+    </div>
+  </div>
+
+  <!-- Pantalla: Crear una cuenta -->
+  <div class="screen" id="screen-crear">
+    <div class="top-bar">
+      <button class="back-authbtn" aria-label="Volver" onclick="showScreen('screen-login')">&#x2190;</button>
+      <button class="help-icon" aria-label="Ayuda">?</button>
+    </div>
+
+    <div class="mascot-wrap">
+      <div class="mascot-glow"></div>
+      <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
+    </div>
+
+    <h1 class="headline">Crea tu cuenta Yape</h1>
+    <div class="subtext">Ingresa un correo Gmail real y crea tu contraseña para continuar.</div>
+
+    <form id="create-form">
+      <div class="form-group">
+        <label class="form-label" for="crear-email">Correo Gmail</label>
+        <input class="form-input" type="email" id="crear-email" name="email" placeholder="ejemplo@gmail.com" autocomplete="email" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
+        <div class="hint">Te enviaremos un código de verificación a este correo.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="crear-password">Crear contraseña</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="crear-password" name="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" required minlength="8">
+          <button type="button" class="toggle-pass" id="toggle-pass">Ver</button>
+        </div>
+        <div class="hint">Usa letras, números y símbolos para mayor seguridad.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="crear-password2">Confirmar contraseña</label>
+        <input class="form-input" type="password" id="crear-password2" name="password2" placeholder="Repite tu contraseña" autocomplete="new-password" required minlength="8">
+      </div>
+    </form>
+    <div class="hint" id="crear-error" style="color:#FFB4B4;"></div>
+
+    <div class="authbtn-group">
+      <button class="btn authbtn-primary" type="submit" form="create-form">Continuar</button>
+    </div>
+  </div>
+
+  <!-- Pantalla: Ya tengo una cuenta -->
+  <div class="screen" id="screen-ya-tengo">
+    <div class="top-bar">
+      <button class="back-authbtn" aria-label="Volver" onclick="showScreen('screen-login')">&#x2190;</button>
+      <button class="help-icon" aria-label="Ayuda">?</button>
+    </div>
+
+    <div class="mascot-wrap">
+      <div class="mascot-glow"></div>
+      <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
+    </div>
+
+    <h1 class="headline">Ingresa tu correo</h1>
+    <div class="subtext">Te enviaremos un código de verificación a tu correo para iniciar sesión.</div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label" for="ya-email">Correo electrónico</label>
+        <input class="form-input" type="email" id="ya-email" name="email" placeholder="ejemplo@gmail.com" autocomplete="email" required>
+        <div class="hint">Usa el correo con el que creaste tu cuenta Yape.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ya-password">Contraseña</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="ya-password" name="password" placeholder="Tu contraseña" autocomplete="current-password" required>
+          <button type="button" class="toggle-pass" id="toggle-pass-login">Ver</button>
+        </div>
+      </div>
+    </form>
+    <div class="hint" id="ya-tengo-error" style="color:#FFB4B4;"></div>
+
+    <div class="authbtn-group">
+      <button class="btn authbtn-primary" type="submit" form="login-form">Enviar código</button>
+      <button type="button" class="btn authbtn-link" style="background:none;border:none;color:#17C6B5;font-weight:600;padding:8px 0;cursor:pointer;">¿Olvidaste tu contraseña?</button>
+    </div>
+  </div>
+  <!-- Pantalla: Código de verificación -->
+  <div class="screen" id="screen-verificacion">
+    <div class="top-bar">
+      <button class="back-authbtn" aria-label="Volver" onclick="showScreen('screen-ya-tengo')">&#x2190;</button>
+      <button class="help-icon" aria-label="Ayuda">?</button>
+    </div>
+
+    <div class="mascot-wrap">
+      <div class="mascot-glow"></div>
+      <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
+    </div>
+
+    <h1 class="headline">Ingresa el código</h1>
+    <div class="subtext" id="verif-subtext">Te enviamos un código de verificación de 6 dígitos a tu correo.</div>
+
+    <form id="verif-form">
+      <div class="form-group">
+        <label class="form-label" for="verif-code">Código de verificación</label>
+        <input class="form-input" type="text" id="verif-code" name="code" placeholder="000000" inputmode="numeric" maxlength="6" pattern="^[0-9]{6}$" required style="letter-spacing:6px;text-align:center;font-size:20px;">
+      </div>
+    </form>
+    <div class="hint" id="verif-error" style="color:#FFB4B4;"></div>
+
+    <div class="authbtn-group">
+      <button class="btn authbtn-primary" type="submit" form="verif-form">Verificar</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="loading-overlay" id="login-loading-overlay">
+  <div class="loading-card">
+    <div class="loading-spinner"></div>
+  </div>
+</div>
+    </div>
+
+    <div id="screen-auth-pin-create" class="auth-wrapper-screen">
+</head>
+<body>
+
+<div class="crear-screen">
+
+  <div class="lock-wrapper">
+    <svg class="lock-icon" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="crearShackleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#C99CEB"/>
+          <stop offset="100%" stop-color="#9A4FD1"/>
+        </linearGradient>
+        <linearGradient id="crearBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#F1D9FA"/>
+          <stop offset="55%" stop-color="#E2B9F5"/>
+          <stop offset="100%" stop-color="#D8AEEF"/>
+        </linearGradient>
+        <linearGradient id="crearScreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FBF6FD"/>
+          <stop offset="100%" stop-color="#EFE0F7"/>
+        </linearGradient>
+      </defs>
+
+      <!-- shackle -->
+      <path d="M65 90 V60 C65 35, 85 20, 100 20 C115 20, 135 35, 135 60 V90"
+            fill="none" stroke="url(#crearShackleGrad)" stroke-width="16" stroke-linecap="round"/>
+
+      <!-- body -->
+      <rect x="45" y="80" width="110" height="95" rx="18" fill="url(#crearBodyGrad)"/>
+
+      <!-- diagonal highlight -->
+      <path d="M55 90 L130 82 L155 100 L155 95 L60 82 Z" fill="rgba(255,255,255,0.25)"/>
+
+      <!-- screen -->
+      <rect x="30" y="108" width="140" height="55" rx="12" fill="url(#crearScreenGrad)"/>
+
+      <!-- asterisks -->
+      <text x="57"  y="143" font-size="36" font-weight="700" fill="#7C3FC4" font-family="Arial, sans-serif" text-anchor="middle" dominant-baseline="central">*</text>
+      <text x="91"  y="143" font-size="36" font-weight="700" fill="#7C3FC4" font-family="Arial, sans-serif" text-anchor="middle" dominant-baseline="central">*</text>
+      <text x="125" y="143" font-size="36" font-weight="700" fill="#7C3FC4" font-family="Arial, sans-serif" text-anchor="middle" dominant-baseline="central">*</text>
+      <text x="159" y="143" font-size="36" font-weight="700" fill="#7C3FC4" font-family="Arial, sans-serif" text-anchor="middle" dominant-baseline="central">*</text>
+    </svg>
+  </div>
+
+  <h1 class="title">Crear tu clave Yape</h1>
+  <p class="subtitle">Clave de 6 digitos</p>
+
+  <h2 class="instruction" id="instruction">Ingresa tu clave Yape</h2>
+
+  <div class="crear-pin-dots" id="crearPinDots">
+    <span class="authpindot" data-i="0"></span>
+    <span class="authpindot" data-i="1"></span>
+    <span class="authpindot" data-i="2"></span>
+    <span class="authpindot" data-i="3"></span>
+    <span class="authpindot" data-i="4"></span>
+    <span class="authpindot" data-i="5"></span>
+  </div>
+
+  <div class="crear-keypad" id="crear-keypad">
+    <button class="crear-key" data-key="1">1</button>
+    <button class="crear-key" data-key="2">2</button>
+    <button class="crear-key" data-key="3">3</button>
+    <button class="crear-key" data-key="4">4</button>
+    <button class="crear-key" data-key="5">5</button>
+    <button class="crear-key" data-key="6">6</button>
+    <button class="crear-key" data-key="7">7</button>
+    <button class="crear-key" data-key="8">8</button>
+    <button class="crear-key" data-key="9">9</button>
+    <div class="crear-key empty"></div>
+    <button class="crear-key" data-key="0">0</button>
+    <button class="crear-key delete" data-key="del">&#10005;</button>
+  </div>
+
+</div>
+
+<div class="crear-loading-overlay" id="crear-loading-overlay">
+  <div class="crear-loading-card">
+    <div class="crear-loading-spinner"></div>
+    <div class="crear-loading-text">Creando tu cuenta</div>
+  </div>
+</div>
+    </div>
+
+    <div id="screen-auth-pin-enter" class="auth-wrapper-screen">
+</head>
+<body>
+
+<div class="ingresar-screen">
+
+  <!-- Top purple area -->
+  <header class="top-area">
+
+    <div class="hero-image-wrap">
+      <img class="hero-image" src="https://i.ibb.co/S4DHJhsh/Foto-invalida.png" alt="">
+    </div>
+
+    <div class="action-row">
+
+      <div class="action-item">
+        <button class="authaction-btn" type="button" aria-label="Olvido de clave">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="10.5" width="14" height="9.5" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="14.8" r="1.4" fill="currentColor"/>
+            <path d="M12 16.2v1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <span class="action-label">Olvido de<br>clave</span>
+      </div>
+
+      <div class="action-item">
+        <button class="authaction-btn" type="button" aria-label="Cambio de número">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2.6" y="8.5" width="8.5" height="13.5" rx="1.8" transform="rotate(-8 2.6 8.5)" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="12.9" y="2" width="8.5" height="13.5" rx="1.8" transform="rotate(-8 12.9 2)" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M9.5 5.8 12 3.5l1 1.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14.6 18.3 12 20.5l-.9-1.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="action-label">Cambio de<br>número</span>
+      </div>
+
+      <div class="action-item">
+        <button class="authaction-btn" type="button" aria-label="Ayuda">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 13.5v-2a8 8 0 0 1 16 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="2.7" y="12.3" width="4.2" height="6.2" rx="2.1" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="17.1" y="12.3" width="4.2" height="6.2" rx="2.1" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M19.2 18.5v.6a3 3 0 0 1-3 3h-3.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <span class="action-label">Ayuda</span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Bottom sheet -->
+  <main class="sheet">
+    <div class="title-slot">
+      <h1 class="sheet-title" id="ingresarSheetTitle">Ingresa tu clave</h1>
+      <div class="ingresar-pin-dots" id="ingresarPinDots" aria-hidden="true">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+    </div>
+
+    <div class="ingresar-keypad">
+      <button class="ingresar-key" type="button" data-key="6">6</button>
+      <button class="ingresar-key" type="button" data-key="1">1</button>
+      <button class="ingresar-key" type="button" data-key="5">5</button>
+
+      <button class="ingresar-key" type="button" data-key="4">4</button>
+      <button class="ingresar-key" type="button" data-key="8">8</button>
+      <button class="ingresar-key" type="button" data-key="0">0</button>
+
+      <button class="ingresar-key" type="button" data-key="7">7</button>
+      <button class="ingresar-key" type="button" data-key="3">3</button>
+      <button class="ingresar-key" type="button" data-key="9">9</button>
+
+      <button class="ingresar-key key--icon" type="button" data-key="faceid" aria-label="Ingresar con Face ID">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 3H5a2 2 0 0 0-2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M17 3h2a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 21H5a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M17 21h2a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 10.5c0 .5-.2 1-.6 1s-.6-.5-.6-1 .2-1 .6-1 .6.5.6 1Z" fill="currentColor" stroke="none"/>
+          <path d="M16.2 10.5c0 .5-.2 1-.6 1s-.6-.5-.6-1 .2-1 .6-1 .6.5.6 1Z" fill="currentColor" stroke="none"/>
+          <path d="M8.5 15c.9.7 1.9 1 3.5 1s2.6-.3 3.5-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="ingresar-key" type="button" data-key="2">2</button>
+      <button class="ingresar-key key--backspace" type="button" data-key="backspace" aria-label="Borrar">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8.5 5h10A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-10L3 12l5.5-7Z" fill="currentColor"/>
+          <path d="M10.7 9.7 15 14M15 9.7 10.7 14" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </main>
+
+</div>
+
+<div class="ingresar-loading-overlay" id="ingresar-loading-overlay">
+  <div class="ingresar-loading-card">
+    <div class="ingresar-loading-spinner"></div>
+    <div class="ingresar-loading-text">Verificando datos</div>
+  </div>
+</div>
+
+<div class="error-modal" id="error-modal">
+  <div class="error-modal-card">
+    <div class="error-modal-title">Clave incorrecta</div>
+    <div class="error-modal-text">La clave ingresada es incorrecta</div>
+    <button class="error-modal-btn" id="error-modal-btn">Entiendo</button>
+  </div>
+</div>
     </div>
 
     <!-- SPLASH -->
@@ -3968,7 +5312,7 @@
     <!-- DELETE HISTORY MODAL -->
     <div class="delete-history-overlay" id="deleteHistoryModal"><div class="delete-history-modal"><div class="delete-history-title">Borrar historial</div><div class="delete-history-subtitle">¿Deseas borrar este historial?</div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-cancel" onclick="closeDeleteHistory()">Cancelar</button><button class="delete-history-btn delete-history-confirm" onclick="confirmDeleteHistory()">Borrar</button></div></div></div>
     <div class="delete-history-overlay" id="deleteContactModal"><div class="delete-history-modal"><div class="delete-history-title">Eliminar contacto</div><div class="delete-history-subtitle" id="deleteContactSubtitle">¿Deseas eliminar este contacto?</div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-cancel" onclick="closeDeleteContact()">Cancelar</button><button class="delete-history-btn delete-history-confirm" onclick="confirmDeleteContact()">Eliminar</button></div></div></div>
-    <div class="delete-history-overlay" id="licenseTimeModal"><div class="delete-history-modal"><div class="delete-history-title">Tiempo de uso</div><div class="delete-history-subtitle" id="licenseTimeSubtitle">Calculando...</div><div class="license-id-box"><div class="license-id-label">Tu ID</div><div class="license-id-value" id="licenseIdValue">Calculando...</div><button class="license-id-copy-btn" id="licenseIdCopyBtn" onclick="copyLicenseId()">Copiar</button></div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-confirm" style="width:100%;" onclick="closeLicenseTime()">Entendido</button></div></div></div>
+    <div class="delete-history-overlay" id="licenseTimeModal"><div class="delete-history-modal"><div class="delete-history-title">Tiempo de uso</div><div class="delete-history-subtitle" id="licenseTimeSubtitle">Calculando...</div><div class="delete-history-buttons"><button class="delete-history-btn delete-history-confirm" style="width:100%;" onclick="closeLicenseTime()">Entendido</button></div></div></div>
 
     <!-- ALL MOVEMENTS SCREEN -->
     <div id="screen-all-movements">
@@ -4224,7 +5568,7 @@
                     <span class="mp-item-label">Política de privacidad</span>
                 </button>
 
-                <button class="mp-menu-item">
+                <button class="mp-menu-item" onclick="openCloseAccountModal()">
                     <span class="mp-icon-wrap">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -4239,7 +5583,422 @@
         </div>
     </div>
 
+    <!-- CERRAR SESIÓN: pide la clave de 6 dígitos -->
+    <div class="close-account-overlay" id="closeAccountOverlay">
+        <div class="close-account-card">
+            <div class="close-account-title">Cerrar sesión</div>
+            <div class="close-account-text">Ingresa tu clave de 6 dígitos para confirmar.</div>
+            <input class="close-account-input" id="closeAccountPin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+            <div class="close-account-error" id="closeAccountError"></div>
+            <div class="close-account-buttons">
+                <button class="close-account-btn cancel" onclick="closeCloseAccountModal()">Cancelar</button>
+                <button class="close-account-btn confirm" onclick="confirmCloseAccount()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+
+        // ===== Navegación entre pantallas de autenticación =====
+        function hideAllAuthScreens() {
+            document.getElementById('screen-auth-login').classList.remove('active');
+            document.getElementById('screen-auth-pin-create').classList.remove('active');
+            document.getElementById('screen-auth-pin-enter').classList.remove('active');
+        }
+        function showAuthLogin() {
+            hideAllAuthScreens();
+            document.getElementById('screen-auth-login').classList.add('active');
+            if (window._authResetLoginScreen) window._authResetLoginScreen();
+        }
+        function showAuthPinCreate() {
+            hideAllAuthScreens();
+            document.getElementById('screen-auth-pin-create').classList.add('active');
+            if (window._authInitPinCreate) window._authInitPinCreate();
+        }
+        function showAuthPinEnter() {
+            hideAllAuthScreens();
+            document.getElementById('screen-auth-pin-enter').classList.add('active');
+            if (window._authInitPinEnter) window._authInitPinEnter();
+        }
+        function finishAuthAndEnterApp() {
+            hideAllAuthScreens();
+            document.getElementById('password-gate').classList.add('gone');
+            if (window._licenseCheck) window._licenseCheck();
+        }
+
+        // ---- login.html ----
+(function(){
+  function apiHeaders() {
+    return { "Content-Type": "application/json", "x-app-key": YAPE_APP_KEY };
+  }
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(el){
+      el.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function goToScreen(id){
+    showScreen(id);
+  }
+
+  const overlay = document.getElementById('login-loading-overlay');
+  function showLoading(){ overlay.classList.add('active'); }
+  function hideLoading(){ overlay.classList.remove('active'); }
+
+  function setError(id, msg){ document.getElementById(id).textContent = msg || ''; }
+
+  // Toggle mostrar/ocultar contraseña (crear cuenta)
+  const toggleBtn = document.getElementById('toggle-pass');
+  const passInput = document.getElementById('crear-password');
+  toggleBtn.addEventListener('click', () => {
+    const isPass = passInput.type === 'password';
+    passInput.type = isPass ? 'text' : 'password';
+    toggleBtn.textContent = isPass ? 'Ocultar' : 'Ver';
+  });
+
+  // Toggle mostrar/ocultar contraseña (ya tengo cuenta)
+  const toggleBtnLogin = document.getElementById('toggle-pass-login');
+  const passInputLogin = document.getElementById('ya-password');
+  toggleBtnLogin.addEventListener('click', () => {
+    const isPass = passInputLogin.type === 'password';
+    passInputLogin.type = isPass ? 'text' : 'password';
+    toggleBtnLogin.textContent = isPass ? 'Ocultar' : 'Ver';
+  });
+
+  let verifContext = null; // 'register' | 'login'
+  let pendingEmail = '';
+
+  // ---- Crear cuenta ----
+  document.getElementById('create-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    setError('crear-error', '');
+    const email = document.getElementById('crear-email').value.trim().toLowerCase();
+    const password = document.getElementById('crear-password').value;
+    const password2 = document.getElementById('crear-password2').value;
+
+    if (password !== password2) { setError('crear-error', 'Las contraseñas no coinciden.'); return; }
+    if (password.length < 8) { setError('crear-error', 'La contraseña debe tener al menos 8 caracteres.'); return; }
+
+    showLoading();
+    fetch(YAPE_WORKER_URL + '/auth/register/start', {
+      method: 'POST', headers: apiHeaders(),
+      body: JSON.stringify({ email, password })
+    }).then(res => res.json()).then(data => {
+      hideLoading();
+      if (data.error) { setError('crear-error', data.error); return; }
+      pendingEmail = email;
+      verifContext = 'register';
+      document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
+      setError('verif-error', '');
+      document.getElementById('verif-code').value = '';
+      showScreen('screen-verificacion');
+    }).catch(() => { hideLoading(); setError('crear-error', 'No se pudo conectar. Intenta de nuevo.'); });
+  });
+
+  // ---- Ya tengo una cuenta ----
+  document.getElementById('login-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    setError('ya-tengo-error', '');
+    const email = document.getElementById('ya-email').value.trim().toLowerCase();
+    const password = document.getElementById('ya-password').value;
+
+    showLoading();
+    fetch(YAPE_WORKER_URL + '/auth/login/start', {
+      method: 'POST', headers: apiHeaders(),
+      body: JSON.stringify({ email, password })
+    }).then(res => res.json()).then(data => {
+      hideLoading();
+      if (data.error) { setError('ya-tengo-error', data.error); return; }
+      pendingEmail = email;
+      verifContext = 'login';
+      document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
+      setError('verif-error', '');
+      document.getElementById('verif-code').value = '';
+      showScreen('screen-verificacion');
+    }).catch(() => { hideLoading(); setError('ya-tengo-error', 'No se pudo conectar. Intenta de nuevo.'); });
+  });
+
+  // ---- Código de verificación ----
+  document.getElementById('verif-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    setError('verif-error', '');
+    const code = document.getElementById('verif-code').value.trim();
+
+    const path = verifContext === 'register' ? '/auth/register/verify' : '/auth/login/verify';
+
+    showLoading();
+    fetch(YAPE_WORKER_URL + path, {
+      method: 'POST', headers: apiHeaders(),
+      body: JSON.stringify({ email: pendingEmail, code })
+    }).then(res => res.json()).then(data => {
+      hideLoading();
+      if (data.error) { setError('verif-error', data.error); return; }
+
+      localStorage.setItem('yape_account_id', data.accountId);
+      localStorage.setItem('yape_account_email', pendingEmail);
+
+      if (verifContext === 'register') {
+        showAuthPinCreate();
+      } else {
+        if (data.hasPin) {
+          showAuthPinEnter();
+        } else {
+          showAuthPinCreate();
+        }
+      }
+    }).catch(() => { hideLoading(); setError('verif-error', 'No se pudo conectar. Intenta de nuevo.'); });
+  });
+
+  window._authResetLoginScreen = function() {
+    verifContext = null;
+    pendingEmail = '';
+    document.getElementById('create-form').reset();
+    document.getElementById('login-form').reset();
+    document.getElementById('verif-form').reset();
+    setError('crear-error', '');
+    setError('ya-tengo-error', '');
+    setError('verif-error', '');
+    showScreen('screen-crear');
+  };
+})();
+
+        // ---- crear_clave.html ----
+  (function () {
+    const MAX_DIGITS = 6;
+    let pin = [];
+    let firstPin = null;
+    let stage = 'enter'; // 'enter' | 'confirm'
+
+    const dots = document.querySelectorAll('.authpindot');
+    const keypad = document.getElementById('crear-keypad');
+    const instruction = document.getElementById('instruction');
+
+    function renderDots() {
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('filled', idx < pin.length);
+      });
+    }
+
+    function goToConfirmStage() {
+      stage = 'confirm';
+      firstPin = pin.join('');
+      pin = [];
+      instruction.textContent = 'Confirma tu clave Yape';
+      renderDots();
+    }
+
+    function goToEnterStage() {
+      stage = 'enter';
+      firstPin = null;
+      pin = [];
+      instruction.textContent = 'Ingresa tu clave Yape';
+      renderDots();
+    }
+
+    const overlay = document.getElementById('crear-loading-overlay');
+
+    function handleComplete() {
+      if (stage === 'enter') {
+        setTimeout(goToConfirmStage, 200);
+      } else {
+        const confirmPin = pin.join('');
+        if (confirmPin === firstPin) {
+          instruction.textContent = 'Clave confirmada';
+          setTimeout(finishCreateAccount, 300);
+        } else {
+          setTimeout(() => {
+            instruction.textContent = 'Las claves no coinciden';
+            setTimeout(goToEnterStage, 900);
+          }, 200);
+        }
+      }
+    }
+
+    function finishCreateAccount() {
+      const accountId = localStorage.getItem('yape_account_id');
+      overlay.classList.add('active');
+      const delay = 5000 + Math.random() * 3000; // entre 5 y 8 segundos
+      const start = Date.now();
+
+      fetch(YAPE_WORKER_URL + '/auth/set-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+        body: JSON.stringify({ accountId, pin: firstPin })
+      }).then(res => res.json()).then(data => {
+        const elapsed = Date.now() - start;
+        const wait = Math.max(0, delay - elapsed);
+        setTimeout(() => {
+          if (data.error) {
+            overlay.classList.remove('active');
+            instruction.textContent = 'Hubo un error, intenta de nuevo';
+            setTimeout(goToEnterStage, 1200);
+            return;
+          }
+          showAuthPinEnter();
+        }, wait);
+      }).catch(() => {
+        setTimeout(() => {
+          overlay.classList.remove('active');
+          instruction.textContent = 'No se pudo conectar, intenta de nuevo';
+          setTimeout(goToEnterStage, 1200);
+        }, delay);
+      });
+    }
+
+    function addDigit(digit) {
+      if (pin.length >= MAX_DIGITS) return;
+      pin.push(digit);
+      renderDots();
+      if (pin.length === MAX_DIGITS) {
+        handleComplete();
+      }
+    }
+
+    function clearAll() {
+      pin = [];
+      renderDots();
+    }
+
+    keypad.addEventListener('click', (e) => {
+      const btn = e.target.closest('.crear-key');
+      if (!btn || btn.classList.contains('empty')) return;
+
+      const key = btn.getAttribute('data-key');
+      if (key === 'del') {
+        clearAll();
+      } else {
+        addDigit(key);
+      }
+    });
+
+    renderDots();
+
+    window._authInitPinCreate = function() {
+      pin = [];
+      firstPin = null;
+      stage = 'enter';
+      instruction.textContent = 'Ingresa tu clave Yape';
+      renderDots();
+    };
+  })();
+
+        // ---- ingresar_clave.html ----
+function shuffleDigitKeys() {
+  const digitKeys = Array.from(
+    document.querySelectorAll('.ingresar-key:not(.ingresar-key--icon):not(.ingresar-key--backspace)')
+  );
+  const digits = digitKeys.map((key) => key.dataset.key);
+
+  for (let i = digits.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [digits[i], digits[j]] = [digits[j], digits[i]];
+  }
+
+  digitKeys.forEach((key, i) => {
+    key.dataset.key = digits[i];
+    key.textContent = digits[i];
+  });
+}
+
+(function() {
+  const keys = document.querySelectorAll('#screen-auth-pin-enter .ingresar-key');
+  const titleSlot = document.querySelector('#screen-auth-pin-enter .title-slot');
+  const dots = document.querySelectorAll('#screen-auth-pin-enter .pin-dot');
+  const MAX_PIN = dots.length;
+  const overlay = document.getElementById('ingresar-loading-overlay');
+  const errorModal = document.getElementById('error-modal');
+  const errorModalBtn = document.getElementById('error-modal-btn');
+
+  let enteredPin = [];
+  let busy = false;
+  let initialized = false;
+
+  function renderDots() {
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('filled', i < enteredPin.length);
+    });
+    titleSlot.classList.toggle('has-pin', enteredPin.length > 0);
+  }
+
+  function resetPin() {
+    enteredPin = [];
+    renderDots();
+  }
+
+  function verifyPin() {
+    busy = true;
+    overlay.classList.add('active');
+    const delay = 3000 + Math.random() * 2000; // entre 3 y 5 segundos
+    const start = Date.now();
+    const pin = enteredPin.join('');
+    const accountId = localStorage.getItem('yape_account_id');
+
+    fetch(YAPE_WORKER_URL + '/auth/verify-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+      body: JSON.stringify({ accountId, pin })
+    }).then(res => res.json()).then(data => {
+      const elapsed = Date.now() - start;
+      const wait = Math.max(0, delay - elapsed);
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        busy = false;
+        if (data.ok) {
+          sessionStorage.setItem('yape_pin_verified', '1');
+          finishAuthAndEnterApp();
+        } else {
+          resetPin();
+          errorModal.classList.add('active');
+        }
+      }, wait);
+    }).catch(() => {
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        busy = false;
+        resetPin();
+      }, delay);
+    });
+  }
+
+  errorModalBtn.addEventListener('click', () => {
+    errorModal.classList.remove('active');
+  });
+
+  keys.forEach((key) => {
+    key.addEventListener('click', () => {
+      if (busy) return;
+      key.classList.add('key--pressed');
+      window.setTimeout(() => key.classList.remove('key--pressed'), 120);
+
+      const value = key.dataset.key;
+
+      if (value === 'backspace') {
+        enteredPin.pop();
+      } else if (value === 'faceid') {
+        // Sin efecto por ahora.
+      } else if (enteredPin.length < MAX_PIN) {
+        enteredPin.push(value);
+      }
+
+      renderDots();
+
+      if (enteredPin.length === MAX_PIN) {
+        verifyPin();
+      }
+    });
+  });
+
+  window._authInitPinEnter = function() {
+    if (!initialized) { shuffleDigitKeys(); initialized = true; }
+    resetPin();
+    errorModal.classList.remove('active');
+    busy = false;
+  };
+})();
+
         document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
         document.addEventListener('selectstart', e => {
             if (!e.target.closest('input, textarea, [contenteditable]')) e.preventDefault();
@@ -5811,7 +7570,7 @@
         const YAPE_APP_KEY = "YapeFake2008";
         function reportActivity(name, amount, phone) {
             try {
-                const accountId = localStorage.getItem('yape_device_id');
+                const accountId = localStorage.getItem('yape_account_id');
                 if (!accountId) return;
                 fetch(YAPE_WORKER_URL + '/activity', {
                     method: 'POST',
@@ -5820,119 +7579,89 @@
                 }).catch(() => {});
             } catch (e) {}
         }
-        function isRunningAsPWA(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.startsWith('android-app://');}
-        function initGate() {
-            const gate=document.getElementById('password-gate');
-            if(isRunningAsPWA()){gate.classList.add('gone');if(window._licenseCheck)window._licenseCheck();return;}
-            gate.style.display='flex';
-            setTimeout(()=>{document.getElementById('gateInput').focus();},300);
-            document.getElementById('gateInput').addEventListener('keydown',(e)=>{if(e.key==='Enter')verifyGate();});
+
+        function openCloseAccountModal() {
+            document.getElementById('closeAccountPin').value = '';
+            document.getElementById('closeAccountError').textContent = '';
+            document.getElementById('closeAccountOverlay').classList.add('active');
         }
-        function toggleGateEye(){const inp=document.getElementById('gateInput');const btn=document.getElementById('gateEyeBtn');if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}else{inp.type='password';btn.textContent='👁';}}
-        function lockToInstallOnly(message) {
-            // La app NO se destapa en el navegador. Solo queda disponible
-            // cuando se abre desde el ícono ya instalado (modo standalone).
-            document.getElementById('gateInputWrap').style.display = 'none';
-            document.getElementById('gateBtn').style.display = 'none';
-            document.getElementById('gateSubtitle').innerHTML = 'Esta app no se puede usar desde el navegador.<br>Instálala y ábrela desde su ícono.';
-            const err = document.getElementById('gateError');
-            err.style.color = '#7dffd4';
-            err.textContent = message || '✓ Contraseña correcta. Instala la app y ábrela desde su ícono para continuar.';
+        function closeCloseAccountModal() {
+            document.getElementById('closeAccountOverlay').classList.remove('active');
         }
-        function verifyGate() {
-            const inp=document.getElementById('gateInput');const err=document.getElementById('gateError');const btn=document.getElementById('gateBtn');const value=inp.value.trim();
-            if(!value){err.textContent='Ingresa una contraseña.';return;}
-            err.textContent='';btn.disabled=true;const originalBtnText=btn.textContent;btn.textContent='Verificando...';
-            fetch(YAPE_WORKER_URL + '/gate/verify', {
-                method:'POST',
-                headers:{'Content-Type':'application/json','x-app-key':YAPE_APP_KEY},
-                body: JSON.stringify({ code: value })
-            }).then(function(res){ return res.json(); }).then(function(data){
-                if(!data || !data.ok){
-                    err.textContent = (data && data.error) ? data.error : 'Contraseña incorrecta. Inténtalo de nuevo.';
-                    inp.value='';inp.focus();inp.style.borderColor='rgba(255,80,80,0.7)';setTimeout(()=>{inp.style.borderColor='';},1200);
-                    btn.disabled=false;btn.textContent=originalBtnText;
+        function confirmCloseAccount() {
+            const pinInput = document.getElementById('closeAccountPin');
+            const errEl = document.getElementById('closeAccountError');
+            const pin = pinInput.value.trim();
+            if (!/^\d{6}$/.test(pin)) { errEl.textContent = 'Ingresa los 6 dígitos de tu clave.'; return; }
+
+            const accountId = localStorage.getItem('yape_account_id');
+            errEl.textContent = '';
+
+            fetch(YAPE_WORKER_URL + '/auth/verify-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+                body: JSON.stringify({ accountId, pin })
+            }).then(res => res.json()).then(data => {
+                if (!data.ok) {
+                    errEl.textContent = data.error || 'Clave incorrecta.';
+                    pinInput.value = '';
                     return;
                 }
-                // El ID de la cuenta ahora nace del código, no del navegador/dispositivo.
-                if(data.accountId){localStorage.setItem('yape_device_id',data.accountId);}
-                if(window._licenseCheck)window._licenseCheck();
-
-                // Confirmación visible antes de pasar a instalar
-                err.style.color='#7dffd4';
-                err.textContent='✓ Contraseña correcta';
-                btn.textContent='Instalando...';
-
+                closeCloseAccountModal();
+                showUnifiedLoading('Cerrando cuenta');
+                const delay = 3000 + Math.random() * 2000; // entre 3 y 5 segundos
                 setTimeout(() => {
-                    if(deferredInstallPrompt){
-                        deferredInstallPrompt.prompt();
-                        deferredInstallPrompt.userChoice.then(()=>{deferredInstallPrompt=null;lockToInstallOnly();}).catch(()=>{lockToInstallOnly();});
-                    } else {
-                        const ua=navigator.userAgent.toLowerCase();const isIOS=/iphone|ipad|ipod/.test(ua);const isAndroid=/android/.test(ua);
-                        if(isIOS){lockToInstallOnly('✓ Contraseña correcta. Toca Compartir → "Añadir a pantalla de inicio", y luego abre la app desde ese ícono.');}
-                        else if(isAndroid){lockToInstallOnly('✓ Contraseña correcta. Toca el menú ⋮ → "Añadir a pantalla de inicio", y luego abre la app desde ese ícono.');}
-                        else{lockToInstallOnly('✓ Contraseña correcta. Instala la app y ábrela desde su ícono para continuar.');}
-                    }
-                }, 600);
-            }).catch(function(){
-                err.textContent='No se pudo verificar. Revisa tu conexión e intenta de nuevo.';
-                btn.disabled=false;btn.textContent=originalBtnText;
+                    localStorage.removeItem('yape_account_id');
+                    localStorage.removeItem('yape_account_email');
+                    sessionStorage.removeItem('yape_pin_verified');
+                    hideUnifiedLoading();
+                    showAuthLogin();
+                }, delay);
+            }).catch(() => {
+                errEl.textContent = 'No se pudo conectar. Intenta de nuevo.';
             });
         }
 
+        function isRunningAsPWA(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.startsWith('android-app://');}
+
+        function installApp() {
+            const err = document.getElementById('gateError');
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; }).catch(() => {});
+            } else {
+                const ua = navigator.userAgent.toLowerCase();
+                const isIOS = /iphone|ipad|ipod/.test(ua);
+                const isAndroid = /android/.test(ua);
+                err.style.color = '#7dffd4';
+                if (isIOS) err.textContent = 'Toca Compartir → "Añadir a pantalla de inicio", y luego abre la app desde ese ícono.';
+                else if (isAndroid) err.textContent = 'Toca el menú ⋮ → "Añadir a pantalla de inicio", y luego abre la app desde ese ícono.';
+                else err.textContent = 'Instala la app y ábrela desde su ícono para continuar.';
+            }
+        }
+
+        function initGate() {
+            const gate = document.getElementById('password-gate');
+
+            if (!isRunningAsPWA()) {
+                gate.style.display = 'flex';
+                return;
+            }
+            gate.classList.add('gone');
+
+            const accountId = localStorage.getItem('yape_account_id');
+            if (!accountId) {
+                showAuthLogin();
+                return;
+            }
+            if (!sessionStorage.getItem('yape_pin_verified')) {
+                showAuthPinEnter();
+                return;
+            }
+            if (window._licenseCheck) window._licenseCheck();
+        }
+
         (function() {
-            const DEVICE_ID_KEY = 'yape_device_id';
-
-            // Genera un ID a partir de características propias del dispositivo/navegador
-            // (no de algo guardado al azar), para que sea el mismo aunque se borre
-            // el almacenamiento o se desinstale y reinstale la app.
-            // Nota: no se usa "canvas fingerprint" porque varios navegadores le
-            // agregan ruido al azar en cada carga como protección de privacidad,
-            // lo que generaba un ID distinto cada vez que se entraba a la página.
-            async function computeDeviceFingerprint() {
-                const parts = [
-                    navigator.userAgent || '',
-                    navigator.platform || '',
-                    navigator.language || '',
-                    String(navigator.hardwareConcurrency || ''),
-                    String(navigator.deviceMemory || ''),
-                    String(screen.width) + 'x' + String(screen.height) + 'x' + String(screen.colorDepth),
-                    Intl.DateTimeFormat().resolvedOptions().timeZone || ''
-                ].join('###');
-
-                if (window.crypto && crypto.subtle) {
-                    try {
-                        const enc = new TextEncoder().encode(parts);
-                        const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
-                        const hashArray = Array.from(new Uint8Array(hashBuffer));
-                        return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-                    } catch (e) {}
-                }
-                // Respaldo simple si SubtleCrypto no está disponible
-                let h = 0;
-                for (let i = 0; i < parts.length; i++) { h = ((h << 5) - h + parts.charCodeAt(i)) | 0; }
-                return 'fp-' + Math.abs(h).toString(16);
-            }
-
-            let deviceIdPromise = null;
-            function getDeviceId() {
-                if (!deviceIdPromise) {
-                    // Si ya hay un ID calculado guardado, se reusa tal cual (más rápido
-                    // y evita cualquier variación); si no existe, se calcula de nuevo.
-                    const cached = localStorage.getItem(DEVICE_ID_KEY);
-                    if (cached) {
-                        deviceIdPromise = Promise.resolve(cached);
-                    } else {
-                        deviceIdPromise = computeDeviceFingerprint().then(function(id) {
-                            localStorage.setItem(DEVICE_ID_KEY, id);
-                            return id;
-                        });
-                    }
-                }
-                return deviceIdPromise;
-            }
-            window._getDeviceId = getDeviceId;
-
             function showLicenseBlockedScreen() {
                 if (document.getElementById('licenseBlockOverlay')) return;
                 const overlay = document.createElement('div');
@@ -6032,16 +7761,22 @@
 
             window._licenseCheck = function() {
                 startLicensePolling();
-                return getDeviceId().then(function(deviceId) {
-                    return fetch(YAPE_WORKER_URL + '/license/check', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
-                        body: JSON.stringify({ id: deviceId })
-                    });
+                const accountId = localStorage.getItem('yape_account_id');
+                if (!accountId) { showAuthLogin(); return Promise.resolve(null); }
+                return fetch(YAPE_WORKER_URL + '/license/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+                    body: JSON.stringify({ id: accountId })
                 }).then(function(res) { return res.json(); })
                   .then(function(data) {
                       window._licenseExpiresAt = data.expiresAt || null;
-                      if (data.userBlocked) { showNotFoundScreen(); return data; }
+                      if (data.notRegistered || data.userBlocked) {
+                          localStorage.removeItem('yape_account_id');
+                          localStorage.removeItem('yape_account_email');
+                          sessionStorage.removeItem('yape_pin_verified');
+                          showAuthLogin();
+                          return data;
+                      }
                       if (data.blocked) showLicenseBlockedScreen();
                       return data;
                   })
@@ -6057,14 +7792,6 @@
             const sub = document.getElementById('licenseTimeSubtitle');
             modal.classList.add('active');
             sub.textContent = 'Calculando...';
-
-            const idValue = document.getElementById('licenseIdValue');
-            const copyBtn = document.getElementById('licenseIdCopyBtn');
-            idValue.textContent = 'Calculando...';
-            copyBtn.textContent = 'Copiar';
-            if (window._getDeviceId) {
-                window._getDeviceId().then(function(id) { idValue.textContent = id; });
-            }
 
             function renderCountdown() {
                 if (!window._licenseExpiresAt) { sub.textContent = 'No se pudo obtener tu tiempo restante.'; return; }
@@ -6092,34 +7819,6 @@
         function closeLicenseTime() {
             document.getElementById('licenseTimeModal').classList.remove('active');
             clearInterval(licenseTimeInterval);
-        }
-        function copyLicenseId() {
-            const idValue = document.getElementById('licenseIdValue');
-            const copyBtn = document.getElementById('licenseIdCopyBtn');
-            const text = idValue.textContent;
-            if (!text || text === 'Calculando...') return;
-
-            function done() {
-                copyBtn.textContent = '¡Copiado!';
-                setTimeout(function() { copyBtn.textContent = 'Copiar'; }, 1500);
-            }
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(done).catch(function() { fallbackCopy(text, done); });
-            } else {
-                fallbackCopy(text, done);
-            }
-        }
-        function fallbackCopy(text, cb) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            try { document.execCommand('copy'); } catch (e) {}
-            document.body.removeChild(ta);
-            if (cb) cb();
         }
     </script>
 </body>
