@@ -4887,6 +4887,14 @@ button{
     <button class="error-modal-btn" id="error-modal-btn">Entiendo</button>
   </div>
 </div>
+
+<div class="error-modal" id="correo-registrado-modal">
+  <div class="error-modal-card">
+    <div class="error-modal-title">Correo ya registrado</div>
+    <div class="error-modal-text">Este correo ya tiene una cuenta en Yape. Toca "Ya tengo una cuenta Yape" para iniciar sesión.</div>
+    <button class="error-modal-btn" onclick="document.getElementById('correo-registrado-modal').classList.remove('active')">Entendido</button>
+  </div>
+</div>
     </div>
 
     <!-- SPLASH -->
@@ -5723,18 +5731,30 @@ button{
     if (password.length < 8) { setError('crear-error', 'La contraseña debe tener al menos 8 caracteres.'); return; }
 
     showLoading();
+    var _crearDelay = 3000 + Math.random() * 2000;
+    var _crearStart = Date.now();
     fetch(YAPE_WORKER_URL + '/auth/register/start', {
       method: 'POST', headers: apiHeaders(),
       body: JSON.stringify({ email, password })
     }).then(res => res.json()).then(data => {
-      hideLoading();
-      if (data.error) { setError('crear-error', data.error); return; }
-      pendingEmail = email;
-      verifContext = 'register';
-      document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
-      setError('verif-error', '');
-      document.getElementById('verif-code').value = '';
-      goToScreen('screen-verificacion');
+      var _crearWait = Math.max(0, _crearDelay - (Date.now() - _crearStart));
+      setTimeout(function() {
+        hideLoading();
+        if (data.error) {
+          if (/registrado|ya existe|already|exist/i.test(data.error)) {
+            document.getElementById('correo-registrado-modal').classList.add('active');
+          } else {
+            setError('crear-error', data.error);
+          }
+          return;
+        }
+        pendingEmail = email;
+        verifContext = 'register';
+        document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
+        setError('verif-error', '');
+        document.getElementById('verif-code').value = '';
+        goToScreen('screen-verificacion');
+      }, _crearWait);
     }).catch(() => { hideLoading(); setError('crear-error', 'No se pudo conectar. Intenta de nuevo.'); });
   });
 
@@ -5746,18 +5766,23 @@ button{
     const password = document.getElementById('ya-password').value;
 
     showLoading();
+    var _loginDelay = 3000 + Math.random() * 2000;
+    var _loginStart = Date.now();
     fetch(YAPE_WORKER_URL + '/auth/login/start', {
       method: 'POST', headers: apiHeaders(),
       body: JSON.stringify({ email, password })
     }).then(res => res.json()).then(data => {
-      hideLoading();
-      if (data.error) { setError('ya-tengo-error', data.error); return; }
-      pendingEmail = email;
-      verifContext = 'login';
-      document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
-      setError('verif-error', '');
-      document.getElementById('verif-code').value = '';
-      goToScreen('screen-verificacion');
+      var _loginWait = Math.max(0, _loginDelay - (Date.now() - _loginStart));
+      setTimeout(function() {
+        hideLoading();
+        if (data.error) { setError('ya-tengo-error', data.error); return; }
+        pendingEmail = email;
+        verifContext = 'login';
+        document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
+        setError('verif-error', '');
+        document.getElementById('verif-code').value = '';
+        goToScreen('screen-verificacion');
+      }, _loginWait);
     }).catch(() => { hideLoading(); setError('ya-tengo-error', 'No se pudo conectar. Intenta de nuevo.'); });
   });
 
