@@ -4825,7 +4825,7 @@ button{
       <button class="ingresar-key" type="button" data-key="3">3</button>
       <button class="ingresar-key" type="button" data-key="9">9</button>
 
-      <button class="ingresar-key key--icon" type="button" data-key="faceid" aria-label="Ingresar con Face ID">
+      <button class="ingresar-key ingresar-key--icon" type="button" data-key="faceid" aria-label="Ingresar con Face ID">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7 3H5a2 2 0 0 0-2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M17 3h2a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -4837,7 +4837,7 @@ button{
         </svg>
       </button>
       <button class="ingresar-key" type="button" data-key="2">2</button>
-      <button class="ingresar-key key--backspace" type="button" data-key="backspace" aria-label="Borrar">
+      <button class="ingresar-key ingresar-key--backspace" type="button" data-key="backspace" aria-label="Borrar">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M8.5 5h10A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-10L3 12l5.5-7Z" fill="currentColor"/>
           <path d="M10.7 9.7 15 14M15 9.7 10.7 14" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
@@ -5604,6 +5604,7 @@ button{
             hideAllAuthScreens();
             document.getElementById('screen-auth-login').classList.add('active');
             if (window._authResetLoginScreen) window._authResetLoginScreen();
+            if (window._stopLicensePolling) window._stopLicensePolling();
         }
         function showAuthPinCreate() {
             hideAllAuthScreens();
@@ -7605,6 +7606,7 @@ function shuffleDigitKeys() {
                     return;
                 }
                 closeCloseAccountModal();
+                if (window._stopLicensePolling) window._stopLicensePolling();
                 showUnifiedLoading('Cerrando cuenta');
                 const delay = 3000 + Math.random() * 2000; // entre 3 y 5 segundos
                 setTimeout(() => {
@@ -7756,10 +7758,19 @@ function shuffleDigitKeys() {
                 });
             }
 
+            window._stopLicensePolling = function() {
+                if (licensePollInterval) { clearInterval(licensePollInterval); licensePollInterval = null; }
+            };
+
             window._licenseCheck = function() {
                 startLicensePolling();
                 const accountId = localStorage.getItem('yape_account_id');
-                if (!accountId) { showAuthLogin(); return Promise.resolve(null); }
+                if (!accountId) {
+                    // Solo redirigir al login si NO estamos ya en la pantalla de autenticación
+                    const authEl = document.getElementById('screen-auth-login');
+                    if (!authEl || !authEl.classList.contains('active')) showAuthLogin();
+                    return Promise.resolve(null);
+                }
                 return fetch(YAPE_WORKER_URL + '/license/check', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
