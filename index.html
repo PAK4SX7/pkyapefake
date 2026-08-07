@@ -3505,6 +3505,28 @@
             font-size: clamp(0.95rem, 4vw, 1.05rem);
             line-height: 1.9;
         }
+        .my-data-screen {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 400;
+            opacity: 0;
+            pointer-events: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .my-data-screen.active { opacity: 1; pointer-events: all; }
+        .my-data-list { padding: 24px 20px; }
+        .my-data-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 16px 0;
+            border-bottom: 1px solid #ECECEF;
+        }
+        .my-data-label { font-size: 12.5px; color: #8B8B94; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        .my-data-value { font-size: 16px; color: #1B1B1F; font-weight: 500; word-break: break-word; }
+
         .close-account-overlay {
             position: fixed;
             inset: 0;
@@ -4119,8 +4141,8 @@
     height: clamp(50px, 7.2vh, 62px);
     border: none;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.16);
-    color: #FFFFFF;
+    background: var(--key-bg);
+    color: var(--text-white);
     font-size: clamp(20px, 5.5vw, 26px);
     font-weight: 700;
     display: flex;
@@ -4132,7 +4154,7 @@
   }
 
   .crear-key:active {
-    background: rgba(255, 255, 255, 0.28);
+    background: var(--key-bg-active);
     transform: scale(0.96);
   }
 
@@ -5448,7 +5470,7 @@ button{
             <div class="mp-section-title">Mi cuenta</div>
             <div class="mp-menu-list">
 
-                <button class="mp-menu-item">
+                <button class="mp-menu-item" onclick="openMyDataModal()">
                     <span class="mp-icon-wrap">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="4" width="20" height="16" rx="2"></rect>
@@ -5625,6 +5647,25 @@ button{
         </div>
     </div>
 
+    <div id="screen-my-data" class="my-data-screen">
+        <div class="mp-top-bar" style="padding: 16px 20px 0;">
+            <button class="mp-back-btn" aria-label="Volver" onclick="closeMyDataModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+        </div>
+        <div class="mp-title-block" style="padding: 0 20px;">
+            <h1 class="mp-page-title">Mis datos</h1>
+        </div>
+        <div class="my-data-list">
+            <div class="my-data-row"><span class="my-data-label">Correo</span><span class="my-data-value" id="myDataEmail">—</span></div>
+            <div class="my-data-row"><span class="my-data-label">Cuenta creada el</span><span class="my-data-value" id="myDataCreated">—</span></div>
+            <div class="my-data-row"><span class="my-data-label">Tu acceso vence el</span><span class="my-data-value" id="myDataExpires">—</span></div>
+        </div>
+    </div>
+
     <script>
 
         // ===== Navegación entre pantallas de autenticación =====
@@ -5654,6 +5695,7 @@ button{
         function finishAuthAndEnterApp() {
             hideAllAuthScreens();
             document.getElementById('password-gate').classList.add('gone');
+            loadData();
             // Cargar secciones del menú principal y luego verificar licencia
             loadSectionsSequentially(function() {
                 if (window._licenseCheck) window._licenseCheck();
@@ -5808,6 +5850,7 @@ button{
       if (data.error) { hideLoading(); setError('verif-error', data.error); return; }
       localStorage.setItem('yape_account_id', data.accountId);
       localStorage.setItem('yape_account_email', pendingEmail);
+      if (data.createdAt) localStorage.setItem('yape_account_created_at', data.createdAt);
       const verifWait = Math.max(0, verifDelay - (Date.now() - verifStart));
       setTimeout(function() {
         hideLoading();
@@ -6088,8 +6131,12 @@ function shuffleDigitKeys() {
             urls.forEach(function(u) { const img = new Image(); img.src = u; });
         })();
 
-        function saveData() { try { localStorage.setItem('yape_balance', document.getElementById('balanceText').textContent); const cleanHistory = yapeHistory.map(entry => { const { dataURL, ...rest } = entry; return rest; }); localStorage.setItem('yape_history', JSON.stringify(cleanHistory)); } catch (e) {} }
-        function loadData() { try { const bt = document.getElementById('balanceText'); const bal = localStorage.getItem('yape_balance'); bt.textContent = (bal && bal.trim() !== '') ? bal : 'S/ 0.00'; const hist = localStorage.getItem('yape_history'); if (hist) yapeHistory.push(...JSON.parse(hist)); } catch (e) { document.getElementById('balanceText').textContent = 'S/ 0.00'; } }
+        function accountStorageKey(base) {
+            const accountId = localStorage.getItem('yape_account_id') || 'guest';
+            return base + '_' + accountId;
+        }
+        function saveData() { try { localStorage.setItem(accountStorageKey('yape_balance'), document.getElementById('balanceText').textContent); const cleanHistory = yapeHistory.map(entry => { const { dataURL, ...rest } = entry; return rest; }); localStorage.setItem(accountStorageKey('yape_history'), JSON.stringify(cleanHistory)); } catch (e) {} }
+        function loadData() { try { yapeHistory.length = 0; const bt = document.getElementById('balanceText'); const bal = localStorage.getItem(accountStorageKey('yape_balance')); bt.textContent = (bal && bal.trim() !== '') ? bal : 'S/ 0.00'; const hist = localStorage.getItem(accountStorageKey('yape_history')); if (hist) yapeHistory.push(...JSON.parse(hist)); if (movementsOpen) renderMovements(); } catch (e) { document.getElementById('balanceText').textContent = 'S/ 0.00'; } }
 
         const splashOverlay = document.getElementById('splash-overlay');
         const splashInner = document.getElementById('splash-inner');
@@ -6114,7 +6161,6 @@ function shuffleDigitKeys() {
         }
 
         function startApp() {
-            loadData();
             setTimeout(() => splashInner.classList.add('visible'), 50);
             setTimeout(() => {
                 splashOverlay.classList.add('hiding');
@@ -6667,6 +6713,7 @@ function shuffleDigitKeys() {
             else if (name === 'editSaldo') closeEditSaldoModal();
             else if (name === 'recarga') closeRecarga();
             else if (name === 'receipt') hideReceiptScreen();
+            else if (name === 'myData') closeMyDataModal();
         }
 
         window.addEventListener('popstate', function (e) {
@@ -7682,6 +7729,27 @@ function shuffleDigitKeys() {
             } catch (e) {}
         }
 
+        function openMyDataModal() {
+            document.getElementById('myDataEmail').textContent = localStorage.getItem('yape_account_email') || '—';
+
+            const createdAt = localStorage.getItem('yape_account_created_at');
+            document.getElementById('myDataCreated').textContent = createdAt
+                ? new Date(createdAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })
+                : '—';
+
+            const expiresAt = window._licenseExpiresAt;
+            document.getElementById('myDataExpires').textContent = expiresAt
+                ? new Date(expiresAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })
+                : '—';
+
+            document.getElementById('screen-my-data').classList.add('active');
+            pushScreenState('myData');
+        }
+        function closeMyDataModal() {
+            document.getElementById('screen-my-data').classList.remove('active');
+            popScreenState();
+        }
+
         function openCloseAccountModal() {
             document.getElementById('closeAccountPin').value = '';
             document.getElementById('closeAccountError').textContent = '';
@@ -7757,33 +7825,14 @@ function shuffleDigitKeys() {
                 showAuthLogin();
                 return;
             }
-            // Verificar con el servidor que la cuenta sigue existiendo
-            fetch(YAPE_WORKER_URL + '/license/check', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
-                body: JSON.stringify({ id: accountId })
-            }).then(function(res) { return res.json(); }).then(function(data) {
-                if (data.notRegistered || data.userBlocked) {
-                    localStorage.removeItem('yape_account_id');
-                    localStorage.removeItem('yape_account_email');
-                    sessionStorage.removeItem('yape_pin_verified');
-                    showAuthLogin();
-                    return;
-                }
-                if (!sessionStorage.getItem('yape_pin_verified')) {
-                    showAuthPinEnter();
-                    return;
-                }
-                loadSectionsSequentially(null);
-                if (window._licenseCheck) window._licenseCheck();
-            }).catch(function() {
-                if (!sessionStorage.getItem('yape_pin_verified')) {
-                    showAuthPinEnter();
-                    return;
-                }
-                loadSectionsSequentially(null);
-                if (window._licenseCheck) window._licenseCheck();
-            });
+            if (!sessionStorage.getItem('yape_pin_verified')) {
+                showAuthPinEnter();
+                return;
+            }
+            // Ya verificado → cargar menú principal
+            loadData();
+            loadSectionsSequentially(null);
+            if (window._licenseCheck) window._licenseCheck();
         }
 
         (function() {
