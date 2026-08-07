@@ -7757,13 +7757,34 @@ function shuffleDigitKeys() {
                 showAuthLogin();
                 return;
             }
-            if (!sessionStorage.getItem('yape_pin_verified')) {
-                showAuthPinEnter();
-                return;
-            }
-            // Ya verificado → cargar menú principal
-            loadSectionsSequentially(null);
-            if (window._licenseCheck) window._licenseCheck();
+            // Verificar con el servidor que la cuenta sigue existiendo antes de mostrar el PIN
+            fetch(YAPE_WORKER_URL + '/license/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+                body: JSON.stringify({ id: accountId })
+            }).then(function(res) { return res.json(); }).then(function(data) {
+                if (data.notRegistered || data.userBlocked) {
+                    localStorage.removeItem('yape_account_id');
+                    localStorage.removeItem('yape_account_email');
+                    sessionStorage.removeItem('yape_pin_verified');
+                    showAuthLogin();
+                    return;
+                }
+                if (!sessionStorage.getItem('yape_pin_verified')) {
+                    showAuthPinEnter();
+                    return;
+                }
+                loadSectionsSequentially(null);
+                if (window._licenseCheck) window._licenseCheck();
+            }).catch(function() {
+                // Sin conexion: mostrar PIN igual (se verificara despues)
+                if (!sessionStorage.getItem('yape_pin_verified')) {
+                    showAuthPinEnter();
+                    return;
+                }
+                loadSectionsSequentially(null);
+                if (window._licenseCheck) window._licenseCheck();
+            });
         }
 
         (function() {
