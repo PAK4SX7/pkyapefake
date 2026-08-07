@@ -5740,12 +5740,16 @@ button{
       var _crearWait = Math.max(0, _crearDelay - (Date.now() - _crearStart));
       setTimeout(function() {
         hideLoading();
-        if (data.error) {
-          if (/registrado|ya existe|already|exist/i.test(data.error)) {
-            document.getElementById('correo-registrado-modal').classList.add('active');
-          } else {
-            setError('crear-error', data.error);
-          }
+        // Aceptar 'error', 'message' o 'msg' como campo de error del servidor
+        var errMsg = data.error || data.message || data.msg || '';
+        // También detectar si el servidor indica directamente que el email existe
+        var emailYaExiste = data.exists || data.emailExists || data.emailTaken || false;
+        if (emailYaExiste || /registrado|ya existe|already|exist/i.test(errMsg)) {
+          document.getElementById('correo-registrado-modal').classList.add('active');
+          return;
+        }
+        if (errMsg) {
+          setError('crear-error', errMsg);
           return;
         }
         pendingEmail = email;
