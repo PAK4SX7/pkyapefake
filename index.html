@@ -3640,21 +3640,32 @@
     justify-content: flex-end;
   }
 
-  .authback-btn{
-    width: clamp(40px, 10vw, 48px);
-    height: clamp(40px, 10vw, 48px);
+  .back-authbtn{
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: none;
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.18);
     color: var(--white);
-    font-size: clamp(22px, 6vw, 26px);
-    font-weight: 700;
-    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
+    transition: background 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-authbtn:active{
+    background: rgba(255,255,255,0.32);
+  }
+  .back-authbtn svg{
+    width: 22px;
+    height: 22px;
+    stroke: #ffffff;
+    stroke-width: 2.2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .help-icon{
@@ -3951,7 +3962,7 @@
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 999;
+    z-index: 999999;
     padding: 20px;
   }
 
@@ -4556,15 +4567,15 @@ button{
     </div>
 
     <div class="authbtn-group">
-      <button class="authbtn authbtn-primary" onclick="goToScreen('screen-crear')">Crear una cuenta</button>
-      <button class="authbtn authbtn-secondary" onclick="goToScreen('screen-ya-tengo')">Ya tengo una cuenta Yape</button>
+      <button class="authbtn authbtn-primary" onclick="navigateWithLoading('screen-crear')">Crear una cuenta</button>
+      <button class="authbtn authbtn-secondary" onclick="navigateWithLoading('screen-ya-tengo')">Ya tengo una cuenta Yape</button>
     </div>
   </div>
 
   <!-- Pantalla: Crear una cuenta -->
   <div class="screen" id="screen-crear">
     <div class="top-bar">
-      <button class="back-authbtn" aria-label="Volver" onclick="showScreen('screen-login')">&#x2190;</button>
+      <button class="back-authbtn" aria-label="Volver" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button class="help-icon" aria-label="Ayuda">?</button>
     </div>
 
@@ -4607,7 +4618,7 @@ button{
   <!-- Pantalla: Ya tengo una cuenta -->
   <div class="screen" id="screen-ya-tengo">
     <div class="top-bar">
-      <button class="back-authbtn" aria-label="Volver" onclick="showScreen('screen-login')">&#x2190;</button>
+      <button class="back-authbtn" aria-label="Volver" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button class="help-icon" aria-label="Ayuda">?</button>
     </div>
 
@@ -4644,7 +4655,7 @@ button{
   <!-- Pantalla: Código de verificación -->
   <div class="screen" id="screen-verificacion">
     <div class="top-bar">
-      <button class="back-authbtn" aria-label="Volver" onclick="showScreen('screen-ya-tengo')">&#x2190;</button>
+      <button class="back-authbtn" aria-label="Volver" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button class="help-icon" aria-label="Ayuda">?</button>
     </div>
 
@@ -5619,6 +5630,8 @@ button{
             document.getElementById('screen-auth-login').classList.add('active');
             if (window._authResetLoginScreen) window._authResetLoginScreen();
             if (window._stopLicensePolling) window._stopLicensePolling();
+            // Empujar estado base para interceptar el botón retroceder del dispositivo
+            history.pushState({ authScreen: 'screen-login' }, '', location.href);
         }
         function showAuthPinCreate() {
             hideAllAuthScreens();
@@ -5656,8 +5669,20 @@ button{
 
   function goToScreen(id){
     showScreen(id);
+    history.pushState({ authScreen: id }, '', location.href);
   }
   window.goToScreen = goToScreen;
+
+  function navigateWithLoading(id){
+    var overlay = document.getElementById('login-loading-overlay');
+    overlay.classList.add('active');
+    var delay = 2000 + Math.random() * 2000; // 2–4 segundos
+    setTimeout(function(){
+      overlay.classList.remove('active');
+      goToScreen(id);
+    }, delay);
+  }
+  window.navigateWithLoading = navigateWithLoading;
 
   const overlay = document.getElementById('login-loading-overlay');
   function showLoading(){ overlay.classList.add('active'); }
@@ -5709,7 +5734,7 @@ button{
       document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
       setError('verif-error', '');
       document.getElementById('verif-code').value = '';
-      showScreen('screen-verificacion');
+      goToScreen('screen-verificacion');
     }).catch(() => { hideLoading(); setError('crear-error', 'No se pudo conectar. Intenta de nuevo.'); });
   });
 
@@ -5732,7 +5757,7 @@ button{
       document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
       setError('verif-error', '');
       document.getElementById('verif-code').value = '';
-      showScreen('screen-verificacion');
+      goToScreen('screen-verificacion');
     }).catch(() => { hideLoading(); setError('ya-tengo-error', 'No se pudo conectar. Intenta de nuevo.'); });
   });
 
@@ -6615,10 +6640,40 @@ function shuffleDigitKeys() {
             else if (name === 'receipt') hideReceiptScreen();
         }
 
-        window.addEventListener('popstate', function () {
+        window.addEventListener('popstate', function (e) {
             if (programmaticSkip > 0) { programmaticSkip--; return; }
+
+            // Navegación dentro de las pantallas de autenticación
+            if (e.state && e.state.authScreen) {
+                const authWrappers = ['screen-auth-login', 'screen-auth-pin-create', 'screen-auth-pin-enter'];
+                const inAuth = authWrappers.some(function(id) {
+                    var el = document.getElementById(id);
+                    return el && el.classList.contains('active');
+                });
+                if (inAuth) {
+                    var targetScreen = e.state.authScreen;
+                    if (window.showScreen) window.showScreen(targetScreen);
+                    // Si retrocedemos a screen-login, re-empujamos estado para no salir de la app
+                    if (targetScreen === 'screen-login') {
+                        history.pushState({ authScreen: 'screen-login' }, '', location.href);
+                    }
+                    return;
+                }
+            }
+
+            // Si estamos en auth y no hay estado que manejar: evitar salir de la app
+            const authWrappersCheck = ['screen-auth-login', 'screen-auth-pin-create', 'screen-auth-pin-enter'];
+            const inAuthNow = authWrappersCheck.some(function(id) {
+                var el = document.getElementById(id);
+                return el && el.classList.contains('active');
+            });
+            if (inAuthNow) {
+                history.pushState({ authScreen: 'screen-login' }, '', location.href);
+                return;
+            }
+
             const top = openLayerStack.pop();
-            if (!top) return; // No hay nada abierto: se deja que el dispositivo salga de la app normalmente.
+            if (!top) return;
             handlingPopstate = true;
             closeLayerByName(top);
             handlingPopstate = false;
