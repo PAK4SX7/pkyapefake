@@ -3562,6 +3562,8 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             background: radial-gradient(ellipse at 50% 38%, #8A24AE 0%, #7B1FA2 55%, #6E1A93 100%);
+            height: 100vh;
+            height: 100dvh;
         }
         .auth-wrapper-screen.active { display: block; }
 
@@ -3607,18 +3609,19 @@
   .authapp{
     width: 100%;
     max-width: 480px;
-    min-height: 100vh;
+    min-height: 100%;
     position: relative;
   }
 
   .screen{
     width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
     display: none;
     flex-direction: column;
     position: relative;
     padding: clamp(16px, 5vw, 32px) clamp(20px, 6vw, 40px);
-    padding-bottom: clamp(24px, 6vw, 40px);
+    padding-bottom: max(clamp(24px, 6vw, 40px), env(safe-area-inset-bottom, 24px));
   }
 
   .screen.active{
@@ -3686,8 +3689,8 @@
 
   #screen-crear .mascot-wrap,
   #screen-ya-tengo .mascot-wrap{
-    margin-top: clamp(2px, 1.5vh, 10px);
-    margin-bottom: clamp(10px, 2.5vh, 18px);
+    margin-top: 0;
+    margin-bottom: clamp(6px, 1.8vh, 12px);
   }
 
   .mascot-glow{
@@ -3716,11 +3719,11 @@
   }
 
   #screen-crear .mascot-img{
-    width: min(48vw, 190px);
+    width: min(36vw, 140px);
   }
 
   #screen-ya-tengo .mascot-img{
-    width: min(60vw, 240px);
+    width: min(44vw, 170px);
   }
 
   /* Text block */
@@ -3736,9 +3739,9 @@
 
   #screen-crear .headline,
   #screen-ya-tengo .headline{
-    font-size: clamp(22px, 6.4vw, 28px);
+    font-size: clamp(20px, 5.8vw, 26px);
     line-height: 1.2;
-    margin-bottom: clamp(6px, 2vw, 10px);
+    margin-bottom: clamp(4px, 1.2vw, 8px);
   }
 
   .subtext{
@@ -3754,18 +3757,18 @@
   }
 
   #screen-crear .subtext{
-    font-size: clamp(13px, 3.8vw, 16px);
-    margin-bottom: clamp(18px, 4vh, 28px);
+    font-size: clamp(13px, 3.6vw, 15px);
+    margin-bottom: clamp(10px, 2.5vh, 16px);
   }
 
   #screen-ya-tengo .subtext{
-    font-size: clamp(13px, 3.8vw, 16px);
-    margin-bottom: clamp(20px, 4.5vh, 32px);
+    font-size: clamp(13px, 3.6vw, 15px);
+    margin-bottom: clamp(12px, 3vh, 20px);
   }
 
   /* Form */
   .form-group{
-    margin-bottom: clamp(14px, 3.5vw, 20px);
+    margin-bottom: clamp(10px, 2.8vw, 16px);
   }
 
   .form-label{
@@ -3778,7 +3781,7 @@
 
   .form-input{
     width: 100%;
-    padding: clamp(13px, 3.6vw, 16px) 14px;
+    padding: clamp(11px, 3vw, 14px) 14px;
     border-radius: 6px;
     border: 1.5px solid var(--input-border);
     background: var(--input-bg);
@@ -3832,7 +3835,7 @@
 
   #screen-crear .authbtn-group,
   #screen-ya-tengo .authbtn-group{
-    padding-top: clamp(16px, 4vh, 28px);
+    padding-top: clamp(10px, 2.5vh, 18px);
   }
 
   .authbtn{
@@ -3896,33 +3899,35 @@
 
   @media (max-height: 640px){
     #screen-crear .mascot-img{
-      width: min(34vw, 130px);
+      width: min(28vw, 110px);
     }
     #screen-crear .mascot-wrap{
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     #screen-crear .headline{
-      font-size: clamp(18px, 5.4vw, 22px);
+      font-size: clamp(17px, 5vw, 20px);
+      margin-bottom: 4px;
     }
     #screen-crear .subtext{
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     #screen-crear .form-group{
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     #screen-ya-tengo .mascot-img{
-      width: min(42vw, 160px);
+      width: min(36vw, 140px);
     }
     #screen-ya-tengo .mascot-wrap{
       margin-top: 0;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     #screen-ya-tengo .headline{
-      font-size: clamp(18px, 5.4vw, 22px);
+      font-size: clamp(17px, 5vw, 20px);
+      margin-bottom: 4px;
     }
     #screen-ya-tengo .subtext{
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
   }
 
