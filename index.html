@@ -3952,22 +3952,24 @@
   }
 
   .loading-card{
-    background: var(--white);
+    background: white;
     border-radius: 8px;
-    padding: clamp(36px, 9vw, 48px) clamp(36px, 10vw, 48px);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    width: 245px;
+    height: 110px;
+    padding: 20px 24px 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: auto;
-    min-width: 240px;
+    gap: 12px;
   }
 
   .loading-spinner{
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    border: 3px solid #17C6B5;
+    border: 3.5px solid #03C7B1;
     border-top-color: transparent;
     animation: spin 0.8s linear infinite;
   }
@@ -4148,25 +4150,27 @@
   }
   .crear-loading-overlay.active { display: flex; }
   .crear-loading-card {
-    background: #ffffff;
+    background: white;
     border-radius: 8px;
-    padding: 28px 32px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    width: 245px;
+    height: 110px;
+    padding: 20px 24px 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-    min-width: 220px;
   }
   .crear-loading-spinner {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    border: 3px solid #17C6B5;
+    border: 3.5px solid #03C7B1;
     border-top-color: transparent;
     animation: loadspin 0.8s linear infinite;
   }
-  .crear-loading-text { font-weight: 700; color: #2D293D; font-size: 15px; text-align: center; }
+  .crear-loading-text { font-weight: 700; color: #2C2044; font-size: 15px; text-align: center; letter-spacing: 0.3px; }
   @keyframes loadspin { to { transform: rotate(360deg); } }
 /* ---- ingresar_clave.html ---- */
 /* ===== Design tokens ===== */
@@ -4452,25 +4456,27 @@ button{
 }
 .ingresar-loading-overlay.active{ display: flex; }
 .ingresar-loading-card{
-  background: #ffffff;
+  background: white;
   border-radius: 8px;
-  padding: 28px 32px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  width: 245px;
+  height: 110px;
+  padding: 20px 24px 18px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  min-width: 220px;
 }
 .ingresar-loading-spinner{
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 3px solid #17C6B5;
+  border: 3.5px solid #03C7B1;
   border-top-color: transparent;
   animation: loadspin 0.8s linear infinite;
 }
-.ingresar-loading-text{ font-weight: 700; color: #2D293D; font-size: 15px; text-align: center; }
+.ingresar-loading-text{ font-weight: 700; color: #2C2044; font-size: 15px; text-align: center; letter-spacing: 0.3px; }
 @keyframes loadspin{ to{ transform: rotate(360deg); } }
 
 /* ===== Modal clave incorrecta ===== */
@@ -4741,7 +4747,7 @@ button{
 <div class="crear-loading-overlay" id="crear-loading-overlay">
   <div class="crear-loading-card">
     <div class="crear-loading-spinner"></div>
-    <div class="crear-loading-text">Creando tu cuenta</div>
+    <div class="crear-loading-text">Verificando datos</div>
   </div>
 </div>
     </div>
@@ -5619,13 +5625,27 @@ button{
         function finishAuthAndEnterApp() {
             hideAllAuthScreens();
             document.getElementById('password-gate').classList.add('gone');
-            // Loading silencioso 2-3s antes de dejar interactuar
-            const silentDelay = 2000 + Math.random() * 1000; // entre 2 y 3 segundos
-            showUnifiedLoading(' ');
-            setTimeout(function() {
-                hideUnifiedLoading();
-                if (window._licenseCheck) window._licenseCheck();
-            }, silentDelay);
+            if (window._licenseCheck) {
+                window._licenseCheck().then(function(data) {
+                    if (!data || data.blocked || data.notRegistered || data.userBlocked) {
+                        // Sin días o bloqueado → pantalla de bloqueo directa, sin loading
+                        return;
+                    }
+                    // Tiene días → loading silencioso 2-3s
+                    const silentDelay = 2000 + Math.random() * 1000;
+                    showUnifiedLoading(' ');
+                    setTimeout(function() { hideUnifiedLoading(); }, silentDelay);
+                }).catch(function() {
+                    // Error de red → loading silencioso igual
+                    const silentDelay = 2000 + Math.random() * 1000;
+                    showUnifiedLoading(' ');
+                    setTimeout(function() { hideUnifiedLoading(); }, silentDelay);
+                });
+            } else {
+                const silentDelay = 2000 + Math.random() * 1000;
+                showUnifiedLoading(' ');
+                setTimeout(function() { hideUnifiedLoading(); }, silentDelay);
+            }
         }
 
         // ---- login.html ----
@@ -5734,25 +5754,28 @@ button{
     const path = verifContext === 'register' ? '/auth/register/verify' : '/auth/login/verify';
 
     showLoading();
+    const verifDelay = 4000 + Math.random() * 1000; // entre 4 y 5 segundos
+    const verifStart = Date.now();
     fetch(YAPE_WORKER_URL + path, {
       method: 'POST', headers: apiHeaders(),
       body: JSON.stringify({ email: pendingEmail, code })
     }).then(res => res.json()).then(data => {
-      hideLoading();
-      if (data.error) { setError('verif-error', data.error); return; }
-
+      if (data.error) { hideLoading(); setError('verif-error', data.error); return; }
       localStorage.setItem('yape_account_id', data.accountId);
       localStorage.setItem('yape_account_email', pendingEmail);
-
-      if (verifContext === 'register') {
-        showAuthPinCreate();
-      } else {
-        if (data.hasPin) {
-          showAuthPinEnter();
-        } else {
+      const verifWait = Math.max(0, verifDelay - (Date.now() - verifStart));
+      setTimeout(function() {
+        hideLoading();
+        if (verifContext === 'register') {
           showAuthPinCreate();
+        } else {
+          if (data.hasPin) {
+            showAuthPinEnter();
+          } else {
+            showAuthPinCreate();
+          }
         }
-      }
+      }, verifWait);
     }).catch(() => { hideLoading(); setError('verif-error', 'No se pudo conectar. Intenta de nuevo.'); });
   });
 
@@ -5824,7 +5847,7 @@ button{
     function finishCreateAccount() {
       const accountId = localStorage.getItem('yape_account_id');
       overlay.classList.add('active');
-      const delay = 5000 + Math.random() * 3000; // entre 5 y 8 segundos
+      const delay = 4000 + Math.random() * 1000; // entre 4 y 5 segundos
       const start = Date.now();
 
       fetch(YAPE_WORKER_URL + '/auth/set-pin', {
@@ -6051,7 +6074,7 @@ function shuffleDigitKeys() {
             setTimeout(() => {
                 splashOverlay.classList.add('hiding');
                 let transitioned = false;
-                function doTransition() { if (transitioned) return; transitioned = true; splashOverlay.classList.add('gone'); loadSectionsSequentially(null); }
+                function doTransition() { if (transitioned) return; transitioned = true; splashOverlay.classList.add('gone'); initGate(); }
                 splashOverlay.addEventListener('transitionend', doTransition, { once: true });
                 setTimeout(doTransition, 600);
             }, 3600);
@@ -7663,6 +7686,8 @@ function shuffleDigitKeys() {
                 showAuthPinEnter();
                 return;
             }
+            // Ya verificado → cargar menú principal
+            loadSectionsSequentially(null);
             if (window._licenseCheck) window._licenseCheck();
         }
 
@@ -7797,8 +7822,6 @@ function shuffleDigitKeys() {
                   .catch(function(err) { console.error('Error verificando licencia:', err); return null; });
             };
         })();
-
-        initGate();
 
         let licenseTimeInterval = null;
         function showLicenseTimeLeft() {
