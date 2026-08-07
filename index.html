@@ -4097,7 +4097,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--dot-inactive);
+    background: rgba(255, 255, 255, 0.35);
     transition: background 0.15s ease, transform 0.15s ease;
   }
 
@@ -4119,8 +4119,8 @@
     height: clamp(50px, 7.2vh, 62px);
     border: none;
     border-radius: 8px;
-    background: var(--key-bg);
-    color: var(--text-white);
+    background: rgba(255, 255, 255, 0.16);
+    color: #FFFFFF;
     font-size: clamp(20px, 5.5vw, 26px);
     font-weight: 700;
     display: flex;
@@ -4132,7 +4132,7 @@
   }
 
   .crear-key:active {
-    background: var(--key-bg-active);
+    background: rgba(255, 255, 255, 0.28);
     transform: scale(0.96);
   }
 
@@ -7757,34 +7757,13 @@ function shuffleDigitKeys() {
                 showAuthLogin();
                 return;
             }
-            // Verificar con el servidor que la cuenta sigue existiendo antes de mostrar el PIN
-            fetch(YAPE_WORKER_URL + '/license/check', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
-                body: JSON.stringify({ id: accountId })
-            }).then(function(res) { return res.json(); }).then(function(data) {
-                if (data.notRegistered || data.userBlocked) {
-                    localStorage.removeItem('yape_account_id');
-                    localStorage.removeItem('yape_account_email');
-                    sessionStorage.removeItem('yape_pin_verified');
-                    showAuthLogin();
-                    return;
-                }
-                if (!sessionStorage.getItem('yape_pin_verified')) {
-                    showAuthPinEnter();
-                    return;
-                }
-                loadSectionsSequentially(null);
-                if (window._licenseCheck) window._licenseCheck();
-            }).catch(function() {
-                // Sin conexion: mostrar PIN igual (se verificara despues)
-                if (!sessionStorage.getItem('yape_pin_verified')) {
-                    showAuthPinEnter();
-                    return;
-                }
-                loadSectionsSequentially(null);
-                if (window._licenseCheck) window._licenseCheck();
-            });
+            if (!sessionStorage.getItem('yape_pin_verified')) {
+                showAuthPinEnter();
+                return;
+            }
+            // Ya verificado → cargar menú principal
+            loadSectionsSequentially(null);
+            if (window._licenseCheck) window._licenseCheck();
         }
 
         (function() {
