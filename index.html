@@ -5619,7 +5619,13 @@ button{
         function finishAuthAndEnterApp() {
             hideAllAuthScreens();
             document.getElementById('password-gate').classList.add('gone');
-            if (window._licenseCheck) window._licenseCheck();
+            // Loading silencioso 2-3s antes de dejar interactuar
+            const silentDelay = 2000 + Math.random() * 1000; // entre 2 y 3 segundos
+            showUnifiedLoading(' ');
+            setTimeout(function() {
+                hideUnifiedLoading();
+                if (window._licenseCheck) window._licenseCheck();
+            }, silentDelay);
         }
 
         // ---- login.html ----
@@ -5929,7 +5935,7 @@ function shuffleDigitKeys() {
   function verifyPin() {
     busy = true;
     overlay.classList.add('active');
-    const delay = 3000 + Math.random() * 2000; // entre 3 y 5 segundos
+    const delay = 4000 + Math.random() * 1000; // entre 4 y 5 segundos
     const start = Date.now();
     const pin = enteredPin.join('');
     const accountId = localStorage.getItem('yape_account_id');
@@ -6048,7 +6054,7 @@ function shuffleDigitKeys() {
                 function doTransition() { if (transitioned) return; transitioned = true; splashOverlay.classList.add('gone'); loadSectionsSequentially(null); }
                 splashOverlay.addEventListener('transitionend', doTransition, { once: true });
                 setTimeout(doTransition, 600);
-            }, 2800);
+            }, 3600);
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startApp);
         else startApp();
