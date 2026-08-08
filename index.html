@@ -4811,6 +4811,15 @@ button{
 
 </div>
 
+<div id="fp-error-modal" style="display:none;position:fixed;inset:0;z-index:9999999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:320px;padding:28px 24px 20px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.2);">
+    <div style="font-size:36px;margin-bottom:14px;">⚠️</div>
+    <p style="font-size:15px;font-weight:600;color:#1a1a1a;margin:0 0 8px;">Ocurrió un error en el sistema</p>
+    <p style="font-size:13px;color:#666;margin:0 0 22px;">Vuelve a intentarlo más tarde.</p>
+    <button onclick="closeFpErrorModal()" style="background:#6B21A8;color:#fff;border:none;border-radius:10px;width:100%;padding:13px;font-size:14px;font-weight:600;cursor:pointer;">Volver al inicio</button>
+  </div>
+</div>
+
 <div class="loading-overlay" id="login-loading-overlay">
   <div class="loading-card">
     <div class="loading-spinner"></div>
@@ -6023,6 +6032,17 @@ button{
   });
 })();
 
+// ---- Helper: modal de error del sistema ----
+function showFpSystemError() {
+  var m = document.getElementById('fp-error-modal');
+  if (m) { m.style.display = 'flex'; }
+}
+function closeFpErrorModal() {
+  var m = document.getElementById('fp-error-modal');
+  if (m) { m.style.display = 'none'; }
+  if (window.goToScreen) window.goToScreen('screen-login');
+}
+
 // ---- Flujo: Olvidé mi contraseña ----
 (function () {
   var fpEmail = '';
@@ -6076,14 +6096,8 @@ button{
       setTimeout(function() {
         overlay.classList.remove('active');
         if (data.error) {
-          // Error del servidor → login con mensaje
-          if (window.goToScreen) window.goToScreen('screen-login');
-          var errEl = document.getElementById('ya-tengo-error');
-          if (errEl) {
-            errEl.style.color = '#FFB4B4';
-            errEl.textContent = 'Ocurrió un error en el sistema, vuelve a intentarlo más tarde.';
-            setTimeout(function() { errEl.textContent = ''; }, 6000);
-          }
+          // Error del servidor (ej: Brevo caído) → modal blanco
+          showFpSystemError();
           return;
         }
         // Éxito → ir a FP2 sin decir nada
@@ -6094,15 +6108,9 @@ button{
         if (window.goToScreen) window.goToScreen('screen-fp-code');
       }, wait);
     }).catch(function() {
-      // Error de red → login con mensaje
+      // Error de red o respuesta no-JSON → modal blanco
       overlay.classList.remove('active');
-      if (window.goToScreen) window.goToScreen('screen-login');
-      var errEl = document.getElementById('ya-tengo-error');
-      if (errEl) {
-        errEl.style.color = '#FFB4B4';
-        errEl.textContent = 'Ocurrió un error en el sistema, vuelve a intentarlo más tarde.';
-        setTimeout(function() { errEl.textContent = ''; }, 6000);
-      }
+      showFpSystemError();
     });
   });
 
