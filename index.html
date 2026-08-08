@@ -3505,6 +3505,33 @@
             font-size: clamp(0.95rem, 4vw, 1.05rem);
             line-height: 1.9;
         }
+        .my-data-screen .mp-top-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .my-data-screen .mp-back-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #790699;
+        }
+        .my-data-screen .mp-back-btn svg {
+            width: clamp(24px, 6.5vw, 28px);
+            height: clamp(24px, 6.5vw, 28px);
+        }
+        .my-data-screen .mp-title-block { margin-top: 8px; }
+        .my-data-screen h1.mp-page-title {
+            font-size: clamp(1.8rem, 7.5vw, 2.3rem);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #790699;
+            margin: 0;
+        }
         .my-data-screen {
             position: fixed;
             inset: 0;
@@ -3590,7 +3617,7 @@
         .auth-wrapper-screen.active { display: block; }
 
 /* ---- login.html ---- */
-  :root{
+  .authapp{
     --purple-bg: #7B1FA2;
     --purple-bg-2: #7A1E9E;
     --teal: #17C6B5;
@@ -4019,7 +4046,7 @@
     to{ transform: rotate(360deg); }
   }
 /* ---- crear_clave.html ---- */
-  :root {
+  .crear-screen {
     --purple-bg: #790599;
     --purple-bg-2: #650780;
     --key-bg: rgba(255, 255, 255, 0.16);
@@ -4215,7 +4242,7 @@
   @keyframes loadspin { to { transform: rotate(360deg); } }
 /* ---- ingresar_clave.html ---- */
 /* ===== Design tokens ===== */
-:root{
+.ingresar-screen{
   --purple-light: #760599;
   --purple-dark:  #58037a;
   --purple-mid:   #760599;
@@ -5657,7 +5684,7 @@ button{
             </button>
         </div>
         <div class="mp-title-block" style="padding: 0 20px;">
-            <h1 class="mp-page-title">Mis datos</h1>
+            <h1 class="mp-page-title">Mi perfil</h1>
         </div>
         <div class="my-data-list">
             <div class="my-data-row"><span class="my-data-label">Correo</span><span class="my-data-value" id="myDataEmail">—</span></div>
