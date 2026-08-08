@@ -4698,7 +4698,7 @@ button{
 
     <div class="authbtn-group">
       <button class="authbtn authbtn-primary" type="submit" form="login-form">Enviar código</button>
-      <button type="button" class="authbtn authbtn-link" style="background:none;border:none;color:#17C6B5;font-weight:600;padding:8px 0;cursor:pointer;">¿Olvidaste tu contraseña?</button>
+      <button type="button" id="btn-forgot-password" class="authbtn authbtn-link" style="background:none;border:none;color:#17C6B5;font-weight:600;padding:8px 0;cursor:pointer;">¿Olvidaste tu contraseña?</button>
     </div>
   </div>
   <!-- Pantalla: Código de verificación -->
@@ -4730,6 +4730,85 @@ button{
   </div>
 
 </div>
+
+  <!-- Pantalla FP1: Ingresar correo -->
+  <div class="screen" id="screen-fp-email">
+    <div class="top-bar">
+      <button class="back-authbtn" aria-label="Volver" id="fp-email-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="help-icon" aria-label="Ayuda">?</button>
+    </div>
+    <div class="mascot-wrap">
+      <div class="mascot-glow"></div>
+      <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
+    </div>
+    <h1 class="headline">¿Olvidaste tu contraseña?</h1>
+    <div class="subtext">Ingresa tu correo y te enviaremos un código para restablecer tu contraseña.</div>
+    <form id="fp-email-form">
+      <div class="form-group">
+        <label class="form-label" for="fp-email-input">Correo electrónico</label>
+        <input class="form-input" type="email" id="fp-email-input" name="email" placeholder="ejemplo@gmail.com" autocomplete="email" required>
+      </div>
+    </form>
+    <div class="hint" id="fp-email-error" style="color:#FFB4B4;"></div>
+    <div class="authbtn-group">
+      <button class="authbtn authbtn-primary" type="submit" form="fp-email-form">Enviar código</button>
+    </div>
+  </div>
+
+  <!-- Pantalla FP2: Verificar código -->
+  <div class="screen" id="screen-fp-code">
+    <div class="top-bar">
+      <button class="back-authbtn" aria-label="Volver" id="fp-code-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="help-icon" aria-label="Ayuda">?</button>
+    </div>
+    <div class="mascot-wrap">
+      <div class="mascot-glow"></div>
+      <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
+    </div>
+    <h1 class="headline">Ingresa el código</h1>
+    <div class="subtext" id="fp-code-subtext">Te enviamos un código de verificación de 6 dígitos a tu correo.</div>
+    <form id="fp-code-form">
+      <div class="form-group">
+        <label class="form-label" for="fp-code-input">Código de verificación</label>
+        <input class="form-input" type="text" id="fp-code-input" name="code" placeholder="000000" inputmode="numeric" maxlength="6" pattern="^[0-9]{6}$" required style="letter-spacing:6px;text-align:center;font-size:20px;">
+      </div>
+    </form>
+    <div class="hint" id="fp-code-error" style="color:#FFB4B4;"></div>
+    <div class="authbtn-group">
+      <button class="authbtn authbtn-primary" type="submit" form="fp-code-form">Verificar</button>
+    </div>
+  </div>
+
+  <!-- Pantalla FP3: Nueva contraseña -->
+  <div class="screen" id="screen-fp-newpass">
+    <div class="top-bar">
+      <button class="back-authbtn" aria-label="Volver" id="fp-newpass-back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button class="help-icon" aria-label="Ayuda">?</button>
+    </div>
+    <div class="mascot-wrap">
+      <div class="mascot-glow"></div>
+      <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
+    </div>
+    <h1 class="headline">Nueva contraseña</h1>
+    <div class="subtext">Crea una nueva contraseña para tu cuenta Yape.</div>
+    <form id="fp-newpass-form">
+      <div class="form-group">
+        <label class="form-label" for="fp-newpass-input">Nueva contraseña</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="fp-newpass-input" name="newPassword" placeholder="Mínimo 8 caracteres" autocomplete="new-password" required minlength="8">
+          <button type="button" class="toggle-pass" id="toggle-fp-pass">Ver</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fp-newpass-input2">Confirmar contraseña</label>
+        <input class="form-input" type="password" id="fp-newpass-input2" name="newPassword2" placeholder="Repite tu contraseña" autocomplete="new-password" required minlength="8">
+      </div>
+    </form>
+    <div class="hint" id="fp-newpass-error" style="color:#FFB4B4;"></div>
+    <div class="authbtn-group">
+      <button class="authbtn authbtn-primary" type="submit" form="fp-newpass-form">Actualizar contraseña</button>
+    </div>
+  </div>
 
 <div class="loading-overlay" id="login-loading-overlay">
   <div class="loading-card">
@@ -5720,13 +5799,42 @@ button{
             if (window._authInitPinEnter) window._authInitPinEnter();
         }
         function finishAuthAndEnterApp() {
-            hideAllAuthScreens();
-            document.getElementById('password-gate').classList.add('gone');
-            loadData();
-            // Cargar secciones del menú principal y luego verificar licencia
-            loadSectionsSequentially(function() {
-                if (window._licenseCheck) window._licenseCheck();
-            });
+            // Verificar licencia PRIMERO antes de mostrar nada
+            var accountId = localStorage.getItem('yape_account_id') || '';
+            if (accountId) {
+                fetch(YAPE_WORKER_URL + '/license/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+                    body: JSON.stringify({ id: accountId })
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    window._licenseExpiresAt = data.expiresAt || null;
+                    if (data.notRegistered || data.userBlocked || data.blocked) {
+                        // Sin días o bloqueado: mostrar pantalla de bloqueo sin entrar al menú
+                        hideAllAuthScreens();
+                        document.getElementById('password-gate').classList.add('gone');
+                        if (window.showLicenseBlockedScreen) window.showLicenseBlockedScreen();
+                        return;
+                    }
+                    // Tiene días: entrar normalmente al menú
+                    hideAllAuthScreens();
+                    document.getElementById('password-gate').classList.add('gone');
+                    loadData();
+                    loadSectionsSequentially(function() {
+                        if (window._licenseCheck) window._licenseCheck();
+                    });
+                })
+                .catch(function() {
+                    // Sin conexión: dejar entrar (el poll periódico lo manejará)
+                    hideAllAuthScreens();
+                    document.getElementById('password-gate').classList.add('gone');
+                    loadData();
+                    loadSectionsSequentially(function() {
+                        if (window._licenseCheck) window._licenseCheck();
+                    });
+                });
+            }
         }
 
         // ---- login.html ----
@@ -5905,6 +6013,152 @@ button{
     setError('verif-error', '');
     showScreen('screen-login');
   };
+
+  // Botón "¿Olvidaste tu contraseña?" → ir a FP1
+  document.getElementById('btn-forgot-password').addEventListener('click', function() {
+    document.getElementById('fp-email-input').value = '';
+    setError('fp-email-error', '');
+    goToScreen('screen-fp-email');
+  });
+})();
+
+// ---- Flujo: Olvidé mi contraseña ----
+(function () {
+  var fpEmail = '';
+  var fpCode  = '';
+
+  function fpSetError(id, msg) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = msg || '';
+  }
+
+  // Botón back FP1 → volver al login
+  document.getElementById('fp-email-back').addEventListener('click', function() {
+    if (window.goToScreen) window.goToScreen('screen-login');
+  });
+
+  // Botón back FP2 → volver a FP1
+  document.getElementById('fp-code-back').addEventListener('click', function() {
+    if (window.goToScreen) window.goToScreen('screen-fp-email');
+  });
+
+  // Botón back FP3 → volver a FP2
+  document.getElementById('fp-newpass-back').addEventListener('click', function() {
+    if (window.goToScreen) window.goToScreen('screen-fp-code');
+  });
+
+  // Toggle mostrar/ocultar contraseña en FP3
+  document.getElementById('toggle-fp-pass').addEventListener('click', function() {
+    var inp = document.getElementById('fp-newpass-input');
+    var isPass = inp.type === 'password';
+    inp.type = isPass ? 'text' : 'password';
+    this.textContent = isPass ? 'Ocultar' : 'Ver';
+  });
+
+  // FP1: enviar correo
+  document.getElementById('fp-email-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    fpSetError('fp-email-error', '');
+    fpEmail = document.getElementById('fp-email-input').value.trim().toLowerCase();
+    if (!fpEmail) { fpSetError('fp-email-error', 'Ingresa tu correo.'); return; }
+
+    var overlay = document.getElementById('login-loading-overlay');
+    overlay.classList.add('active');
+    var delay = 3000 + Math.random() * 2000;
+    var start = Date.now();
+
+    fetch(YAPE_WORKER_URL + '/auth/reset/start', {
+      method: 'POST', headers: apiHeaders(),
+      body: JSON.stringify({ email: fpEmail })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var wait = Math.max(0, delay - (Date.now() - start));
+      setTimeout(function() {
+        overlay.classList.remove('active');
+        if (data.error) { fpSetError('fp-email-error', data.error); return; }
+        document.getElementById('fp-code-subtext').textContent =
+          'Te enviamos un código de verificación de 6 dígitos a ' + fpEmail + '.';
+        document.getElementById('fp-code-input').value = '';
+        fpSetError('fp-code-error', '');
+        if (window.goToScreen) window.goToScreen('screen-fp-code');
+      }, wait);
+    }).catch(function() {
+      overlay.classList.remove('active');
+      fpSetError('fp-email-error', 'No se pudo conectar. Intenta de nuevo.');
+    });
+  });
+
+  // FP2: verificar código
+  document.getElementById('fp-code-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    fpSetError('fp-code-error', '');
+    fpCode = document.getElementById('fp-code-input').value.trim();
+    if (fpCode.length !== 6) { fpSetError('fp-code-error', 'El código debe tener 6 dígitos.'); return; }
+
+    var overlay = document.getElementById('login-loading-overlay');
+    overlay.classList.add('active');
+    var delay = 3000 + Math.random() * 1500;
+    var start = Date.now();
+
+    fetch(YAPE_WORKER_URL + '/auth/reset/verify', {
+      method: 'POST', headers: apiHeaders(),
+      body: JSON.stringify({ email: fpEmail, code: fpCode })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var wait = Math.max(0, delay - (Date.now() - start));
+      setTimeout(function() {
+        overlay.classList.remove('active');
+        if (data.error) { fpSetError('fp-code-error', data.error); return; }
+        document.getElementById('fp-newpass-input').value = '';
+        document.getElementById('fp-newpass-input2').value = '';
+        fpSetError('fp-newpass-error', '');
+        if (window.goToScreen) window.goToScreen('screen-fp-newpass');
+      }, wait);
+    }).catch(function() {
+      overlay.classList.remove('active');
+      fpSetError('fp-code-error', 'No se pudo conectar. Intenta de nuevo.');
+    });
+  });
+
+  // FP3: confirmar nueva contraseña
+  document.getElementById('fp-newpass-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    fpSetError('fp-newpass-error', '');
+    var newPass  = document.getElementById('fp-newpass-input').value;
+    var newPass2 = document.getElementById('fp-newpass-input2').value;
+    if (newPass !== newPass2) { fpSetError('fp-newpass-error', 'Las contraseñas no coinciden.'); return; }
+    if (newPass.length < 8)   { fpSetError('fp-newpass-error', 'La contraseña debe tener al menos 8 caracteres.'); return; }
+
+    var overlay = document.getElementById('login-loading-overlay');
+    overlay.classList.add('active');
+    var delay = 3000 + Math.random() * 2000;
+    var start = Date.now();
+
+    fetch(YAPE_WORKER_URL + '/auth/reset/confirm', {
+      method: 'POST', headers: apiHeaders(),
+      body: JSON.stringify({ email: fpEmail, code: fpCode, newPassword: newPass })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      var wait = Math.max(0, delay - (Date.now() - start));
+      setTimeout(function() {
+        overlay.classList.remove('active');
+        if (data.error) { fpSetError('fp-newpass-error', data.error); return; }
+        // Éxito: volver al login con mensaje
+        if (window.goToScreen) window.goToScreen('screen-login');
+        var errEl = document.getElementById('ya-tengo-error');
+        if (errEl) {
+          errEl.style.color = '#7FFFD4';
+          errEl.textContent = '✓ Contraseña actualizada. Ahora inicia sesión.';
+          setTimeout(function() {
+            errEl.textContent = '';
+            errEl.style.color = '#FFB4B4';
+          }, 5000);
+        }
+        fpEmail = '';
+        fpCode  = '';
+      }, wait);
+    }).catch(function() {
+      overlay.classList.remove('active');
+      fpSetError('fp-newpass-error', 'No se pudo conectar. Intenta de nuevo.');
+    });
+  });
 })();
 
         // ---- crear_clave.html ----
@@ -7863,7 +8117,7 @@ function shuffleDigitKeys() {
         }
 
         (function() {
-            function showLicenseBlockedScreen() {
+            window.showLicenseBlockedScreen = function showLicenseBlockedScreen() {
                 if (document.getElementById('licenseBlockOverlay')) return;
                 const overlay = document.createElement('div');
                 overlay.id = 'licenseBlockOverlay';
@@ -7987,7 +8241,19 @@ function shuffleDigitKeys() {
                           showAuthLogin();
                           return data;
                       }
-                      if (data.blocked) showLicenseBlockedScreen();
+                      if (data.blocked) {
+                          showLicenseBlockedScreen();
+                      } else {
+                          // Tenía el overlay de bloqueo pero ahora ya tiene días: quitar overlay y cargar menú
+                          var existingBlock = document.getElementById('licenseBlockOverlay');
+                          if (existingBlock) {
+                              existingBlock.remove();
+                              var gate = document.getElementById('password-gate');
+                              if (gate && !gate.classList.contains('gone')) gate.classList.add('gone');
+                              loadData();
+                              loadSectionsSequentially(function() {});
+                          }
+                      }
                       return data;
                   })
                   .catch(function(err) { console.error('Error verificando licencia:', err); return null; });
