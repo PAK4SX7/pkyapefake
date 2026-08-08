@@ -6075,7 +6075,18 @@ button{
       var wait = Math.max(0, delay - (Date.now() - start));
       setTimeout(function() {
         overlay.classList.remove('active');
-        if (data.error) { fpSetError('fp-email-error', data.error); return; }
+        if (data.error) {
+          // Error del servidor → login con mensaje
+          if (window.goToScreen) window.goToScreen('screen-login');
+          var errEl = document.getElementById('ya-tengo-error');
+          if (errEl) {
+            errEl.style.color = '#FFB4B4';
+            errEl.textContent = 'Ocurrió un error en el sistema, vuelve a intentarlo más tarde.';
+            setTimeout(function() { errEl.textContent = ''; }, 6000);
+          }
+          return;
+        }
+        // Éxito → ir a FP2 sin decir nada
         document.getElementById('fp-code-subtext').textContent =
           'Te enviamos un código de verificación de 6 dígitos a ' + fpEmail + '.';
         document.getElementById('fp-code-input').value = '';
@@ -6083,8 +6094,15 @@ button{
         if (window.goToScreen) window.goToScreen('screen-fp-code');
       }, wait);
     }).catch(function() {
+      // Error de red → login con mensaje
       overlay.classList.remove('active');
-      fpSetError('fp-email-error', 'No se pudo conectar. Intenta de nuevo.');
+      if (window.goToScreen) window.goToScreen('screen-login');
+      var errEl = document.getElementById('ya-tengo-error');
+      if (errEl) {
+        errEl.style.color = '#FFB4B4';
+        errEl.textContent = 'Ocurrió un error en el sistema, vuelve a intentarlo más tarde.';
+        setTimeout(function() { errEl.textContent = ''; }, 6000);
+      }
     });
   });
 
