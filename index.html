@@ -6069,7 +6069,7 @@ button{
     var start = Date.now();
 
     fetch(YAPE_WORKER_URL + '/auth/reset/start', {
-      method: 'POST', headers: apiHeaders(),
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-app-key': 'YapeFake2008' },
       body: JSON.stringify({ email: fpEmail })
     }).then(function(r) { return r.json(); }).then(function(data) {
       var wait = Math.max(0, delay - (Date.now() - start));
@@ -6101,7 +6101,7 @@ button{
     var start = Date.now();
 
     fetch(YAPE_WORKER_URL + '/auth/reset/verify', {
-      method: 'POST', headers: apiHeaders(),
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-app-key': 'YapeFake2008' },
       body: JSON.stringify({ email: fpEmail, code: fpCode })
     }).then(function(r) { return r.json(); }).then(function(data) {
       var wait = Math.max(0, delay - (Date.now() - start));
@@ -6134,7 +6134,7 @@ button{
     var start = Date.now();
 
     fetch(YAPE_WORKER_URL + '/auth/reset/confirm', {
-      method: 'POST', headers: apiHeaders(),
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-app-key': 'YapeFake2008' },
       body: JSON.stringify({ email: fpEmail, code: fpCode, newPassword: newPass })
     }).then(function(r) { return r.json(); }).then(function(data) {
       var wait = Math.max(0, delay - (Date.now() - start));
