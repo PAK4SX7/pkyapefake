@@ -4676,8 +4676,8 @@ button{
       <img class="mascot-img" src="https://i.ibb.co/vC9XPDNG/iniciar-secc.png" alt="Mascota Yape">
     </div>
 
-    <h1 class="headline">Ingresa tu correo</h1>
-    <div class="subtext">Te enviaremos un código de verificación a tu correo para iniciar sesión.</div>
+    <h1 class="headline">Ingresa a tu cuenta</h1>
+    <div class="subtext">Ingresa tu correo y contraseña para continuar.</div>
 
     <form id="login-form">
       <div class="form-group">
@@ -4697,7 +4697,7 @@ button{
     <div class="hint" id="ya-tengo-error" style="color:#FFB4B4;"></div>
 
     <div class="authbtn-group">
-      <button class="authbtn authbtn-primary" type="submit" form="login-form">Enviar código</button>
+      <button class="authbtn authbtn-primary" type="submit" form="login-form">Ingresar</button>
       <button type="button" id="btn-forgot-password" class="authbtn authbtn-link" style="background:none;border:none;color:#17C6B5;font-weight:600;padding:8px 0;cursor:pointer;">¿Olvidaste tu contraseña?</button>
     </div>
   </div>
@@ -5958,12 +5958,15 @@ button{
       setTimeout(function() {
         hideLoading();
         if (data.error) { setError('ya-tengo-error', data.error); return; }
-        pendingEmail = email;
-        verifContext = 'login';
-        document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
-        setError('verif-error', '');
-        document.getElementById('verif-code').value = '';
-        goToScreen('screen-verificacion');
+        // Acceso directo: guardar cuenta y mostrar PIN
+        localStorage.setItem('yape_account_id', data.accountId);
+        localStorage.setItem('yape_account_email', email);
+        if (data.createdAt) localStorage.setItem('yape_account_created_at', data.createdAt);
+        if (data.hasPin) {
+          showAuthPinEnter();
+        } else {
+          showAuthPinCreate();
+        }
       }, _loginWait);
     }).catch(() => { hideLoading(); setError('ya-tengo-error', 'No se pudo conectar. Intenta de nuevo.'); });
   });
