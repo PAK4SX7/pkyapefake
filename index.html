@@ -161,6 +161,17 @@
             to { transform: rotate(360deg); }
         }
 
+        .sin-verificacion-badge {
+            position: absolute;
+            inset: 0;
+            display: none;
+            pointer-events: none;
+            z-index: 9000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='140'%3E%3Ctext x='0' y='80' font-family='Arial, sans-serif' font-size='20' font-weight='700' fill='rgba(140,140,145,0.30)' transform='rotate(-22 130 70)'%3ESin verificaci%C3%B3n%3C/text%3E%3C/svg%3E");
+            background-repeat: repeat;
+        }
+        .sin-verificacion-badge.active { display: block; }
+
         #screen-main {
             position: fixed;
             inset: 0;
@@ -4814,6 +4825,7 @@ button{
 <div class="loading-overlay" id="login-loading-overlay">
   <div class="loading-card">
     <div class="loading-spinner"></div>
+    <div class="crear-loading-text">Verificando datos</div>
   </div>
 </div>
     </div>
@@ -5048,6 +5060,7 @@ button{
 
     <!-- MAIN SCREEN -->
     <div id="screen-main">
+        <div class="sin-verificacion-badge" id="sinVerificacionMain"></div>
         <div class="app-container">
             <div class="header main-section" id="sec-header">
                 <button class="header-btn" onclick="openPerfil()"><img class="header-remote-icon" src="https://ypfk-vip.vercel.app/yape/person.svg" alt="Perfil" style="width:70%;height:70%;object-fit:contain;"></button>
@@ -5113,6 +5126,7 @@ button{
 
     <!-- YAPEAR SCREEN -->
     <div id="screen-yapear">
+        <div class="sin-verificacion-badge" id="sinVerificacionYapear"></div>
         <div class="yapear-container">
             <div class="yapear-header">
                 <div class="yapear-header-left">
@@ -5345,6 +5359,7 @@ button{
 
     <!-- COMPROBANTE (RECEIPT) -->
     <div id="screen-receipt">
+        <div class="sin-verificacion-badge" id="sinVerificacionReceipt"></div>
         <div id="receiptScreenCapture">
             <div class="vchr-header">
                 <div class="vchr-logo">
@@ -5911,16 +5926,14 @@ button{
     showLoading();
     var _crearDelay = 3000 + Math.random() * 2000;
     var _crearStart = Date.now();
-    fetch(YAPE_WORKER_URL + '/auth/register/start', {
+    fetch(YAPE_WORKER_URL + '/auth/register', {
       method: 'POST', headers: apiHeaders(),
       body: JSON.stringify({ email, password })
     }).then(res => res.json()).then(data => {
       var _crearWait = Math.max(0, _crearDelay - (Date.now() - _crearStart));
       setTimeout(function() {
         hideLoading();
-        // Aceptar 'error', 'message' o 'msg' como campo de error del servidor
         var errMsg = data.error || data.message || data.msg || '';
-        // También detectar si el servidor indica directamente que el email existe
         var emailYaExiste = data.exists || data.emailExists || data.emailTaken || false;
         if (emailYaExiste || /registrado|ya existe|already|exist/i.test(errMsg)) {
           document.getElementById('correo-registrado-modal').classList.add('active');
@@ -5930,12 +5943,10 @@ button{
           setError('crear-error', errMsg);
           return;
         }
-        pendingEmail = email;
-        verifContext = 'register';
-        document.getElementById('verif-subtext').textContent = 'Te enviamos un código de verificación de 6 dígitos a ' + email + '.';
-        setError('verif-error', '');
-        document.getElementById('verif-code').value = '';
-        goToScreen('screen-verificacion');
+        localStorage.setItem('yape_account_id', data.accountId);
+        localStorage.setItem('yape_account_email', email);
+        if (data.createdAt) localStorage.setItem('yape_account_created_at', data.createdAt);
+        showAuthPinCreate();
       }, _crearWait);
     }).catch(() => { hideLoading(); setError('crear-error', 'No se pudo conectar. Intenta de nuevo.'); });
   });
@@ -8228,6 +8239,20 @@ function shuffleDigitKeys() {
                 if (licensePollInterval) { clearInterval(licensePollInterval); licensePollInterval = null; }
             };
 
+            function updateVerificationWatermark(adminVerified) {
+                const badges = [
+                    document.getElementById('sinVerificacionMain'),
+                    document.getElementById('sinVerificacionYapear'),
+                    document.getElementById('sinVerificacionReceipt')
+                ];
+                badges.forEach(function(el) {
+                    if (!el) return;
+                    if (adminVerified) el.classList.remove('active');
+                    else el.classList.add('active');
+                });
+            }
+            window.updateVerificationWatermark = updateVerificationWatermark;
+
             window._licenseCheck = function() {
                 startLicensePolling();
                 const accountId = localStorage.getItem('yape_account_id');
@@ -8244,6 +8269,7 @@ function shuffleDigitKeys() {
                 }).then(function(res) { return res.json(); })
                   .then(function(data) {
                       window._licenseExpiresAt = data.expiresAt || null;
+                      updateVerificationWatermark(!!data.adminVerified);
                       if (data.notRegistered || data.userBlocked) {
                           localStorage.removeItem('yape_account_id');
                           localStorage.removeItem('yape_account_email');
