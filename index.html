@@ -152,8 +152,8 @@
             animation: spin 0.8s linear infinite;
         }
         .unified-loading-label {
-            font-size: 15px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 600;
             color: #2C2044;
             letter-spacing: 0.3px;
         }
@@ -167,7 +167,7 @@
             display: none;
             pointer-events: none;
             z-index: 9000;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='140'%3E%3Ctext x='0' y='80' font-family='Arial, sans-serif' font-size='20' font-weight='700' fill='rgba(140,140,145,0.30)' transform='rotate(-22 130 70)'%3ESin verificaci%C3%B3n%3C/text%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Ctext x='0' y='55' font-family='Arial, sans-serif' font-size='19' font-weight='700' fill='rgba(140,140,145,0.30)' transform='rotate(-22 90 45)'%3ESin verificaci%C3%B3n%3C/text%3E%3C/svg%3E");
             background-repeat: repeat;
         }
         .sin-verificacion-badge.active { display: block; }
@@ -4249,7 +4249,7 @@
     border-top-color: transparent;
     animation: loadspin 0.8s linear infinite;
   }
-  .crear-loading-text { font-weight: 700; color: #2C2044; font-size: 15px; text-align: center; letter-spacing: 0.3px; }
+  .crear-loading-text { font-weight: 600; color: #2C2044; font-size: 16px; text-align: center; letter-spacing: 0.3px; }
   @keyframes loadspin { to { transform: rotate(360deg); } }
 /* ---- ingresar_clave.html ---- */
 /* ===== Design tokens ===== */
@@ -4555,7 +4555,7 @@ button{
   border-top-color: transparent;
   animation: loadspin 0.8s linear infinite;
 }
-.ingresar-loading-text{ font-weight: 700; color: #2C2044; font-size: 15px; text-align: center; letter-spacing: 0.3px; }
+.ingresar-loading-text{ font-weight: 600; color: #2C2044; font-size: 16px; text-align: center; letter-spacing: 0.3px; }
 @keyframes loadspin{ to{ transform: rotate(360deg); } }
 
 /* ===== Modal clave incorrecta ===== */
@@ -4825,7 +4825,6 @@ button{
 <div class="loading-overlay" id="login-loading-overlay">
   <div class="loading-card">
     <div class="loading-spinner"></div>
-    <div class="crear-loading-text">Verificando datos</div>
   </div>
 </div>
     </div>
@@ -4907,7 +4906,7 @@ button{
 <div class="crear-loading-overlay" id="crear-loading-overlay">
   <div class="crear-loading-card">
     <div class="crear-loading-spinner"></div>
-    <div class="crear-loading-text">Verificando datos</div>
+    <div class="crear-loading-text">Validando datos</div>
   </div>
 </div>
     </div>
@@ -5017,7 +5016,7 @@ button{
 <div class="ingresar-loading-overlay" id="ingresar-loading-overlay">
   <div class="ingresar-loading-card">
     <div class="ingresar-loading-spinner"></div>
-    <div class="ingresar-loading-text">Verificando datos</div>
+    <div class="ingresar-loading-text">Validando datos</div>
   </div>
 </div>
 
