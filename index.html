@@ -167,7 +167,7 @@
             display: none;
             pointer-events: none;
             z-index: 9000;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Ctext x='0' y='55' font-family='Arial, sans-serif' font-size='19' font-weight='700' fill='rgba(140,140,145,0.30)' transform='rotate(-22 90 45)'%3ESin verificaci%C3%B3n%3C/text%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Ctext x='0' y='55' font-family='Arial, sans-serif' font-size='19' font-weight='700' fill='rgba(140,140,145,0.30)' transform='rotate(-22 90 45)'%3ESin valor%3C/text%3E%3C/svg%3E");
             background-repeat: repeat;
         }
         .sin-verificacion-badge.active { display: block; }
@@ -8080,6 +8080,9 @@ function shuffleDigitKeys() {
                 }
                 closeCloseAccountModal();
                 if (window._stopLicensePolling) window._stopLicensePolling();
+                document.getElementById('screen-perfil').classList.remove('active');
+                document.getElementById('screen-my-data').classList.remove('active');
+                document.getElementById('screen-all-movements').classList.remove('active');
                 showUnifiedLoading('Cerrando cuenta');
                 const delay = 3000 + Math.random() * 2000; // entre 3 y 5 segundos
                 setTimeout(() => {
