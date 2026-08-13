@@ -4825,7 +4825,7 @@ button{
 <div class="loading-overlay" id="login-loading-overlay">
   <div class="loading-card">
     <div class="loading-spinner"></div>
-    <div style="font-weight:600;color:#2C2044;font-size:15px;text-align:center;margin-top:10px;letter-spacing:0.3px;">Validando datos</div>
+    <div id="login-loading-text" style="display:none;font-weight:600;color:#2C2044;font-size:15px;text-align:center;letter-spacing:0.3px;">Validando datos</div>
   </div>
 </div>
     </div>
@@ -5886,7 +5886,10 @@ button{
   window.navigateWithLoading = navigateWithLoading;
 
   const overlay = document.getElementById('login-loading-overlay');
-  function showLoading(){ overlay.classList.add('active'); }
+  function showLoading(showText){
+    document.getElementById('login-loading-text').style.display = showText ? 'block' : 'none';
+    overlay.classList.add('active');
+  }
   function hideLoading(){ overlay.classList.remove('active'); }
 
   function setError(id, msg){ document.getElementById(id).textContent = msg || ''; }
@@ -5923,7 +5926,7 @@ button{
     if (password !== password2) { setError('crear-error', 'Las contraseñas no coinciden.'); return; }
     if (password.length < 8) { setError('crear-error', 'La contraseña debe tener al menos 8 caracteres.'); return; }
 
-    showLoading();
+    showLoading(true);
     var _crearDelay = 3000 + Math.random() * 2000;
     var _crearStart = Date.now();
     fetch(YAPE_WORKER_URL + '/auth/register', {
@@ -5958,7 +5961,7 @@ button{
     const email = document.getElementById('ya-email').value.trim().toLowerCase();
     const password = document.getElementById('ya-password').value;
 
-    showLoading();
+    showLoading(true);
     var _loginDelay = 3000 + Math.random() * 2000;
     var _loginStart = Date.now();
     fetch(YAPE_WORKER_URL + '/auth/login/start', {
@@ -5990,7 +5993,7 @@ button{
 
     const path = verifContext === 'register' ? '/auth/register/verify' : '/auth/login/verify';
 
-    showLoading();
+    showLoading(true);
     const verifDelay = 4000 + Math.random() * 1000; // entre 4 y 5 segundos
     const verifStart = Date.now();
     fetch(YAPE_WORKER_URL + path, {
