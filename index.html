@@ -162,12 +162,12 @@
         }
 
         .sin-verificacion-badge {
-            position: absolute;
+            position: fixed;
             inset: 0;
             display: block;
             pointer-events: none;
-            z-index: 9000;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='60'%3E%3Ctext x='0' y='42' font-family='Arial, sans-serif' font-size='26' font-weight='800' letter-spacing='-1' fill='rgba(140,140,145,0.30)' transform='rotate(-22 80 30)'%3ESin valor%3C/text%3E%3C/svg%3E");
+            z-index: 2147483647;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='70'%3E%3Ctext x='20' y='48' font-family='Arial, sans-serif' font-size='26' font-weight='800' letter-spacing='-1' fill='rgba(140,140,145,0.28)' transform='rotate(-22 90 35)'%3ESin valor%3C/text%3E%3C/svg%3E");
             background-repeat: repeat;
         }
         .sin-verificacion-badge.active { display: none; }
@@ -5836,6 +5836,7 @@ button{
                     // Tiene días: entrar normalmente al menú
                     hideAllAuthScreens();
                     document.getElementById('password-gate').classList.add('gone');
+                    history.replaceState({ app: 'main' }, '', location.href);
                     loadData();
                     loadSectionsSequentially(function() {
                         if (window._licenseCheck) window._licenseCheck();
@@ -5845,6 +5846,7 @@ button{
                     // Sin conexión: dejar entrar (el poll periódico lo manejará)
                     hideAllAuthScreens();
                     document.getElementById('password-gate').classList.add('gone');
+                    history.replaceState({ app: 'main' }, '', location.href);
                     loadData();
                     loadSectionsSequentially(function() {
                         if (window._licenseCheck) window._licenseCheck();
@@ -5876,8 +5878,9 @@ button{
 
   function navigateWithLoading(id){
     var overlay = document.getElementById('login-loading-overlay');
+    document.getElementById('login-loading-text').style.display = 'none';
     overlay.classList.add('active');
-    var delay = 2000 + Math.random() * 2000; // 2–4 segundos
+    var delay = 2000 + Math.random() * 2000;
     setTimeout(function(){
       overlay.classList.remove('active');
       goToScreen(id);
