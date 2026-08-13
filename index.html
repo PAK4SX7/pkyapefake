@@ -164,13 +164,13 @@
         .sin-verificacion-badge {
             position: absolute;
             inset: 0;
-            display: none;
+            display: block;
             pointer-events: none;
             z-index: 9000;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='60'%3E%3Ctext x='0' y='42' font-family='Arial, sans-serif' font-size='26' font-weight='800' letter-spacing='-1' fill='rgba(140,140,145,0.30)' transform='rotate(-22 80 30)'%3ESin valor%3C/text%3E%3C/svg%3E");
             background-repeat: repeat;
         }
-        .sin-verificacion-badge.active { display: block; }
+        .sin-verificacion-badge.active { display: none; }
 
         #screen-main {
             position: fixed;
@@ -8181,7 +8181,23 @@ function shuffleDigitKeys() {
                 return;
             }
             if (!sessionStorage.getItem('yape_pin_verified')) {
-                showAuthPinEnter();
+                // Verificar si la cuenta aún existe antes de mostrar el PIN
+                fetch(YAPE_WORKER_URL + '/license/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+                    body: JSON.stringify({ id: accountId })
+                }).then(function(r) { return r.json(); }).then(function(data) {
+                    if (data.notRegistered || data.userBlocked) {
+                        localStorage.removeItem('yape_account_id');
+                        localStorage.removeItem('yape_account_email');
+                        sessionStorage.removeItem('yape_pin_verified');
+                        showAuthLogin();
+                    } else {
+                        showAuthPinEnter();
+                    }
+                }).catch(function() {
+                    showAuthPinEnter(); // sin conexión: mostrar PIN igual
+                });
                 return;
             }
             // Ya verificado → cargar menú principal
@@ -8300,8 +8316,8 @@ function shuffleDigitKeys() {
                 ];
                 badges.forEach(function(el) {
                     if (!el) return;
-                    if (adminVerified) el.classList.remove('active');
-                    else el.classList.add('active');
+                    if (adminVerified) el.classList.add('active');
+                    else el.classList.remove('active');
                 });
             }
             window.updateVerificationWatermark = updateVerificationWatermark;
