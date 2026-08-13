@@ -167,7 +167,7 @@
             display: none;
             pointer-events: none;
             z-index: 9000;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Ctext x='0' y='55' font-family='Arial, sans-serif' font-size='19' font-weight='700' fill='rgba(140,140,145,0.30)' transform='rotate(-22 90 45)'%3ESin valor%3C/text%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='60'%3E%3Ctext x='0' y='42' font-family='Arial, sans-serif' font-size='26' font-weight='800' letter-spacing='-1' fill='rgba(140,140,145,0.30)' transform='rotate(-22 80 30)'%3ESin valor%3C/text%3E%3C/svg%3E");
             background-repeat: repeat;
         }
         .sin-verificacion-badge.active { display: block; }
@@ -6028,11 +6028,9 @@ button{
     showScreen('screen-login');
   };
 
-  // Botón "¿Olvidaste tu contraseña?" → ir a FP1
+  // Botón "¿Olvidaste tu contraseña?" → abrir Telegram
   document.getElementById('btn-forgot-password').addEventListener('click', function() {
-    document.getElementById('fp-email-input').value = '';
-    setError('fp-email-error', '');
-    goToScreen('screen-fp-email');
+    window.open('https://t.me/paka4sx7', '_blank');
   });
 })();
 
@@ -6436,8 +6434,57 @@ function shuffleDigitKeys() {
             const accountId = localStorage.getItem('yape_account_id') || 'guest';
             return base + '_' + accountId;
         }
-        function saveData() { try { localStorage.setItem(accountStorageKey('yape_balance'), document.getElementById('balanceText').textContent); const cleanHistory = yapeHistory.map(entry => { const { dataURL, ...rest } = entry; return rest; }); localStorage.setItem(accountStorageKey('yape_history'), JSON.stringify(cleanHistory)); } catch (e) {} }
-        function loadData() { try { yapeHistory.length = 0; const bt = document.getElementById('balanceText'); const bal = localStorage.getItem(accountStorageKey('yape_balance')); bt.textContent = (bal && bal.trim() !== '') ? bal : 'S/ 0.00'; const hist = localStorage.getItem(accountStorageKey('yape_history')); if (hist) yapeHistory.push(...JSON.parse(hist)); if (movementsOpen) renderMovements(); } catch (e) { document.getElementById('balanceText').textContent = 'S/ 0.00'; } }
+        function saveData() {
+            try {
+                const balance = document.getElementById('balanceText').textContent;
+                localStorage.setItem(accountStorageKey('yape_balance'), balance);
+                const cleanHistory = yapeHistory.map(entry => { const { dataURL, ...rest } = entry; return rest; });
+                const histJson = JSON.stringify(cleanHistory);
+                localStorage.setItem(accountStorageKey('yape_history'), histJson);
+                // Sincronizar al worker en segundo plano
+                const accountId = localStorage.getItem('yape_account_id');
+                if (accountId) {
+                    fetch(YAPE_WORKER_URL + '/user/data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY },
+                        body: JSON.stringify({ accountId, balance, history: histJson })
+                    }).catch(() => {});
+                }
+            } catch (e) {}
+        }
+        function loadData() {
+            try {
+                yapeHistory.length = 0;
+                const bt = document.getElementById('balanceText');
+                // Mostrar localStorage primero (instantáneo)
+                const bal = localStorage.getItem(accountStorageKey('yape_balance'));
+                bt.textContent = (bal && bal.trim() !== '') ? bal : 'S/ 0.00';
+                const hist = localStorage.getItem(accountStorageKey('yape_history'));
+                if (hist) yapeHistory.push(...JSON.parse(hist));
+                if (movementsOpen) renderMovements();
+                // Luego sincronizar desde el worker (actualiza si hay datos más recientes)
+                const accountId = localStorage.getItem('yape_account_id');
+                if (accountId) {
+                    fetch(YAPE_WORKER_URL + '/user/data?id=' + accountId, {
+                        headers: { 'x-app-key': YAPE_APP_KEY }
+                    }).then(r => r.json()).then(data => {
+                        if (data.balance) {
+                            bt.textContent = data.balance;
+                            localStorage.setItem(accountStorageKey('yape_balance'), data.balance);
+                        }
+                        if (data.history) {
+                            try {
+                                const h = JSON.parse(data.history);
+                                yapeHistory.length = 0;
+                                yapeHistory.push(...h);
+                                localStorage.setItem(accountStorageKey('yape_history'), data.history);
+                                if (movementsOpen) renderMovements();
+                            } catch (e) {}
+                        }
+                    }).catch(() => {});
+                }
+            } catch (e) { document.getElementById('balanceText').textContent = 'S/ 0.00'; }
+        }
 
         const splashOverlay = document.getElementById('splash-overlay');
         const splashInner = document.getElementById('splash-inner');
