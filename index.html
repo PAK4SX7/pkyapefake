@@ -164,13 +164,13 @@
         .sin-verificacion-badge {
             position: fixed;
             inset: 0;
-            display: block;
+            display: none;
             pointer-events: none;
             z-index: 2147483647;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext x='60' y='60' font-family='Arial, sans-serif' font-size='20' font-weight='800' letter-spacing='-1' fill='rgba(140,140,145,0.25)' text-anchor='middle' dominant-baseline='middle' transform='rotate(-35 60 60)'%3ESin valor%3C/text%3E%3C/svg%3E");
             background-repeat: repeat;
         }
-        .sin-verificacion-badge.active { display: none; }
+        .sin-verificacion-badge.active { display: block; }
 
         #screen-main {
             position: fixed;
@@ -5827,14 +5827,17 @@ button{
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     window._licenseExpiresAt = data.expiresAt || null;
-                    if (data.notRegistered || data.userBlocked || data.blocked) {
-                        // Sin días o bloqueado: mostrar pantalla de bloqueo sin entrar al menú
+                    var blocked = data.notRegistered || data.userBlocked || data.blocked;
+                    // Aplicar watermark ANTES de mostrar cualquier pantalla
+                    if (window.updateVerificationWatermark) window.updateVerificationWatermark(!blocked);
+                    if (blocked) {
+                        // Sin días: mostrar marca de agua + pantalla de bloqueo
                         hideAllAuthScreens();
                         document.getElementById('password-gate').classList.add('gone');
                         if (window.showLicenseBlockedScreen) window.showLicenseBlockedScreen();
                         return;
                     }
-                    // Tiene días: entrar normalmente al menú
+                    // Tiene días: entrar al menú sin marca de agua
                     hideAllAuthScreens();
                     document.getElementById('password-gate').classList.add('gone');
                     history.replaceState({ app: 'main' }, '', location.href);
@@ -5844,7 +5847,8 @@ button{
                     });
                 })
                 .catch(function() {
-                    // Sin conexión: dejar entrar (el poll periódico lo manejará)
+                    // Sin conexión: ocultar marca (beneficio de la duda) y dejar entrar
+                    if (window.updateVerificationWatermark) window.updateVerificationWatermark(true);
                     hideAllAuthScreens();
                     document.getElementById('password-gate').classList.add('gone');
                     history.replaceState({ app: 'main' }, '', location.href);
@@ -8320,8 +8324,8 @@ function shuffleDigitKeys() {
                 ];
                 badges.forEach(function(el) {
                     if (!el) return;
-                    if (adminVerified) el.classList.add('active');
-                    else el.classList.remove('active');
+                    if (adminVerified) el.classList.remove('active');
+                    else el.classList.add('active');
                 });
             }
             window.updateVerificationWatermark = updateVerificationWatermark;
