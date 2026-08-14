@@ -887,7 +887,8 @@
             transition: border 0.2s, filter 0.35s ease, opacity 0.35s ease;
             text-align: center;
             background: transparent;
-            width: 200px;
+            width: 90%;
+            max-width: 340px;
         }
         .recipient-name:focus {
             border-bottom: 1px solid #ccc;
@@ -917,8 +918,8 @@
         }
         .name-skeleton {
             display: none;
-            width: 150px;
-            height: 15px;
+            width: 190px;
+            height: 19px;
             border-radius: 6px;
             background: linear-gradient(90deg, #EDEDF2 25%, #F7F7FA 37%, #EDEDF2 63%);
             background-size: 400% 100%;
@@ -1040,9 +1041,11 @@
             display: none;
             text-align: center;
             font-size: 12px;
-            letter-spacing: 1.5px;
+            letter-spacing: 0;
             color: rgba(74,74,84,0.65);
             font-weight: 400;
+            font-style: normal;
+            font-family: inherit;
             margin-top: -4px;
             flex-shrink: 0;
             transition: filter 0.35s ease, opacity 0.35s ease;
