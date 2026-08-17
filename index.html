@@ -6747,10 +6747,10 @@ function shuffleDigitKeys() {
                     capture.style.transform = `scale(${coverScale})`;
                     capture.style.transformOrigin = 'top center';
                     receiptScreen.classList.remove('scrollable');
-                    // Centrar verticalmente subiendo el capture
+                    // Pegar el contenido al top sin espacio arriba
                     const scaledH = naturalHeight * coverScale;
                     const offset = (viewportHeight - scaledH) / 2;
-                    capture.style.marginTop = (offset > 0 ? 0 : offset) + 'px';
+                    capture.style.marginTop = (offset < 0 ? offset : -Math.abs(offset)) + 'px';
                 }
                 receiptScreen.scrollTop = 0;
             }
