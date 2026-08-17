@@ -6746,11 +6746,13 @@ function shuffleDigitKeys() {
                 } else {
                     capture.style.transform = `scale(${coverScale})`;
                     capture.style.transformOrigin = 'top center';
-                    // Subir todo el capture para eliminar espacio arriba
+                    // Subir el capture: el marginTop se escala también, así que dividimos por coverScale
                     const scaledH = naturalHeight * coverScale;
                     const gap = (viewportHeight - scaledH) / 2;
-                    const extraUp = Math.floor(viewportHeight * 0.06); // subir un 6% extra
-                    capture.style.marginTop = gap > 0 ? -extraUp + 'px' : Math.floor(gap) - extraUp + 'px';
+                    // gap es el espacio sobrante. Si es positivo, hay espacio vacío arriba.
+                    // Convertimos a unidades pre-escala para que el translate funcione bien
+                    const upPx = gap > 0 ? gap / coverScale : 0;
+                    capture.style.marginTop = -Math.ceil(upPx) + 'px';
                     receiptScreen.style.alignItems = 'flex-start';
                     receiptScreen.classList.remove('scrollable');
                 }
