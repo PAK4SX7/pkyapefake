@@ -1878,7 +1878,7 @@
             padding-bottom: clamp(16px, 4vw, 32px);
             transform-origin: top center;
             will-change: transform;
-            margin-top: 0 !important;
+            margin-top: 0;
         }
 
         .vchr-header {
@@ -6747,6 +6747,10 @@ function shuffleDigitKeys() {
                     capture.style.transform = `scale(${coverScale})`;
                     capture.style.transformOrigin = 'top center';
                     receiptScreen.classList.remove('scrollable');
+                    // Centrar verticalmente subiendo el capture
+                    const scaledH = naturalHeight * coverScale;
+                    const offset = (viewportHeight - scaledH) / 2;
+                    capture.style.marginTop = (offset > 0 ? 0 : offset) + 'px';
                 }
                 receiptScreen.scrollTop = 0;
             }
