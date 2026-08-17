@@ -6746,11 +6746,9 @@ function shuffleDigitKeys() {
                 } else {
                     capture.style.transform = `scale(${coverScale})`;
                     capture.style.transformOrigin = 'top center';
+                    capture.style.marginTop = '0';
+                    receiptScreen.style.alignItems = 'flex-start';
                     receiptScreen.classList.remove('scrollable');
-                    // Pegar el contenido al top sin espacio arriba
-                    const scaledH = naturalHeight * coverScale;
-                    const offset = (viewportHeight - scaledH) / 2;
-                    capture.style.marginTop = '-280px';
                 }
                 receiptScreen.scrollTop = 0;
             }
