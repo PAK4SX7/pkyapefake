@@ -8093,6 +8093,50 @@ function shuffleDigitKeys() {
         window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; });
         const YAPE_WORKER_URL = "https://contactos-yape.leonardoentraenee-uu-com.workers.dev";
         const YAPE_APP_KEY = "YapeFake2008";
+
+        // ---- Cargar config del voucher desde el worker y aplicarla ----
+        (function applyVoucherConfig() {
+          fetch(YAPE_WORKER_URL + '/voucher-config', {
+            headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY }
+          }).then(function(r) { return r.json(); }).then(function(d) {
+            const c = d.config;
+            if (!c) return;
+            const s = document.documentElement.style;
+            // Imágenes
+            const logoEl = document.getElementById('receiptLogoGif');
+            const headerAdEl = document.getElementById('receiptHeaderAd');
+            const promoImgEl = document.querySelector('#receiptPromoWrap img');
+            if (logoEl && c.logoGif) { logoEl.src = c.logoGif; window._vcLogoGif = c.logoGif; }
+            if (headerAdEl && c.headerAd) headerAdEl.src = c.headerAd;
+            if (promoImgEl && c.promoImg) promoImgEl.src = c.promoImg;
+            if (c.staticLogo) window._vcStaticLogo = c.staticLogo;
+            // CSS variables
+            if (c.bgColor) s.setProperty('--voucher-purple', c.bgColor);
+            if (c.amountColor) s.setProperty('--voucher-text-dark', c.amountColor);
+            // Tamaños de texto via CSS dinámico
+            const styleTag = document.createElement('style');
+            styleTag.id = 'vchr-config-overrides';
+            styleTag.textContent = [
+              c.amountSize    ? `.vchr-amount-value { font-size: ${c.amountSize}px !important; }` : '',
+              c.currencySize  ? `.vchr-amount-currency { font-size: ${c.currencySize}px !important; }` : '',
+              c.receiverSize  ? `.vchr-receiver { font-size: ${c.receiverSize}px !important; }` : '',
+              c.dataSize      ? `.vchr-data-row, .vchr-data-label, .vchr-data-value { font-size: ${c.dataSize}px !important; }` : '',
+              c.secLabelSize  ? `.vchr-security-label { font-size: ${c.secLabelSize}px !important; }` : '',
+              c.chipSize      ? `.vchr-chip { font-size: ${c.chipSize}px !important; width: ${Math.round(c.chipSize*1.5)}px !important; height: ${Math.round(c.chipSize*1.5)}px !important; }` : '',
+              c.headerHeight  ? `.vchr-header { min-height: ${c.headerHeight}px !important; }` : '',
+              c.logoSize      ? `.vchr-logo-gif { width: ${c.logoSize}px !important; height: ${c.logoSize}px !important; }` : '',
+              c.closeSize     ? `.vchr-close-btn { width: ${c.closeSize}px !important; height: ${c.closeSize}px !important; }` : '',
+              c.closeColor    ? `.vchr-close-btn { background: ${c.closeColor} !important; }` : '',
+              c.cardMargin    ? `.vchr-card { margin-left: ${c.cardMargin}px !important; margin-right: ${c.cardMargin}px !important; }` : '',
+              c.cardRadius    ? `.vchr-card { border-radius: ${c.cardRadius}px !important; }` : '',
+              c.promoMarginTop ? `.vchr-promo-wrap { margin-top: ${c.promoMarginTop}px !important; }` : '',
+              c.dividerHeight ? `.vchr-divider { height: ${c.dividerHeight}px !important; }` : '',
+              c.dividerColor  ? `.vchr-divider { background: ${c.dividerColor} !important; }` : '',
+              c.dividerMargin ? `.vchr-divider { margin: ${c.dividerMargin}px 0 !important; }` : '',
+            ].join('\n');
+            document.head.appendChild(styleTag);
+          }).catch(function() {});
+        })();
         function reportActivity(name, amount, phone) {
             try {
                 const accountId = localStorage.getItem('yape_account_id');
