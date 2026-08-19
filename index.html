@@ -6543,24 +6543,25 @@ function shuffleDigitKeys() {
         else startApp();
 
         // ============================================================
-        // MODO PREVIEW — activado cuando index.html?vcPreview=1
-        // El admin.html lo carga en un iframe para un preview idéntico
+        // MODO PREVIEW — activo cuando app.html?vcPreview=1
+        // El admin lo carga en un iframe para preview idéntico al real
         // ============================================================
-        if (new URLSearchParams(location.search).has('vcPreview')) {
-          // Interceptar startApp y reemplazarlo
-          function startApp() { _startVcPreview(); }
+        (function() {
+          if (!new URLSearchParams(location.search).has('vcPreview')) return;
 
-          function _startVcPreview() {
-            // Ocultar splash, gate y todas las screens excepto receipt
+          // Redefinir startApp para que solo inicie el preview
+          startApp = function() {
+            // Ocultar splash y gate
             ['splash-overlay','password-gate'].forEach(function(id) {
               var el = document.getElementById(id);
               if (el) el.style.display = 'none';
             });
+            // Ocultar todas las screens excepto receipt
             document.querySelectorAll('.screen').forEach(function(s) {
               if (s.id !== 'screen-receipt') s.style.display = 'none';
             });
 
-            // Mostrar receipt de forma estática (sin position:fixed)
+            // Mostrar receipt como bloque estático (no fixed)
             var receipt = document.getElementById('screen-receipt');
             receipt.classList.add('active');
             receipt.style.cssText = [
@@ -6569,76 +6570,75 @@ function shuffleDigitKeys() {
               'display:flex !important',
               'flex-direction:column',
               'width:100%',
+              'min-height:100dvh',
               'background:var(--voucher-purple,#680387)',
-              'overflow-y:auto',
-              'min-height:100dvh'
+              'overflow-y:visible'
             ].join(';');
 
-            // Datos de ejemplo
-            var eid = function(id) { return document.getElementById(id); };
-            if (eid('receiptAmount'))   eid('receiptAmount').textContent   = '1';
-            if (eid('receiptReceiver')) eid('receiptReceiver').textContent  = 'Juan Pérez*';
-            if (eid('receiptDate'))     eid('receiptDate').textContent      = '17 ago. 2026';
-            if (eid('receiptTime'))     eid('receiptTime').textContent      = '10:30 a. m.';
-            if (eid('receiptPhone'))    eid('receiptPhone').textContent     = '*** *** 000';
-            if (eid('receiptDestino'))  eid('receiptDestino').textContent   = 'Yape';
-            if (eid('receiptOpCode'))   eid('receiptOpCode').textContent    = '12345678';
+            // Datos de ejemplo fijos
+            var g = function(id){ return document.getElementById(id); };
+            if (g('receiptAmount'))   g('receiptAmount').textContent   = '1';
+            if (g('receiptReceiver')) g('receiptReceiver').textContent  = 'Juan Pérez*';
+            if (g('receiptDate'))     g('receiptDate').textContent      = '17 ago. 2026';
+            if (g('receiptTime'))     g('receiptTime').textContent      = '10:30 a. m.';
+            if (g('receiptPhone'))    g('receiptPhone').textContent     = '*** *** 000';
+            if (g('receiptDestino'))  g('receiptDestino').textContent   = 'Yape';
+            if (g('receiptOpCode'))   g('receiptOpCode').textContent    = '12345678';
             var chips = document.querySelectorAll('#receiptCodeChips .vchr-chip');
-            ['1','2','3'].forEach(function(d,i){ if (chips[i]) chips[i].textContent = d; });
+            ['1','2','3'].forEach(function(d,i){ if(chips[i]) chips[i].textContent = d; });
 
-            // Escuchar config desde el admin
+            // Escuchar mensajes del admin con la config a aplicar
             window.addEventListener('message', function(e) {
               if (!e.data || e.data.type !== 'vcPreviewUpdate') return;
-              _applyVcPreviewConfig(e.data.config || {});
+              _vcApplyPreview(e.data.config || {});
             });
-            // Avisar al parent que estamos listos
+
+            // Avisar al admin que el iframe está listo
             if (window.parent !== window) {
               window.parent.postMessage({ type: 'vcPreviewReady' }, '*');
             }
-          }
+          };
 
-          function _applyVcPreviewConfig(c) {
+          // Aplica config desde el admin (misma lógica que applyVoucherConfig pero sin fetch)
+          function _vcApplyPreview(c) {
             var s = document.documentElement.style;
-            var logoEl      = document.getElementById('receiptLogoGif');
-            var headerAdEl  = document.getElementById('receiptHeaderAd');
-            var promoImgEl  = document.querySelector('#receiptPromoWrap img');
+            var logoEl     = document.getElementById('receiptLogoGif');
+            var headerAdEl = document.getElementById('receiptHeaderAd');
+            var promoImgEl = document.querySelector('#receiptPromoWrap img');
 
-            // Imágenes — solo si hay valor en config, sino quedan los defaults del HTML
-            if (logoEl && c.logoGif)         logoEl.src     = c.logoGif;
-            if (headerAdEl && c.headerAd)    headerAdEl.src = c.headerAd;
-            if (promoImgEl && c.promoImg)    promoImgEl.src = c.promoImg;
+            if (logoEl && c.logoGif)      { logoEl.src = c.logoGif; }
+            if (headerAdEl && c.headerAd) { headerAdEl.src = c.headerAd; }
+            if (promoImgEl && c.promoImg) { promoImgEl.src = c.promoImg; }
 
-            // Variables CSS
-            s.setProperty('--voucher-purple',    c.bgColor     || '#680387');
-            s.setProperty('--voucher-text-dark',  c.amountColor || '#2C2044');
+            if (c.bgColor)     s.setProperty('--voucher-purple',    c.bgColor);
+            if (c.amountColor) s.setProperty('--voucher-text-dark', c.amountColor);
 
-            // Overrides de tamaño via <style>
-            var styleTag = document.getElementById('vchr-config-overrides');
-            if (!styleTag) {
-              styleTag = document.createElement('style');
-              styleTag.id = 'vchr-config-overrides';
-              document.head.appendChild(styleTag);
+            var tag = document.getElementById('vchr-config-overrides');
+            if (!tag) {
+              tag = document.createElement('style');
+              tag.id = 'vchr-config-overrides';
+              document.head.appendChild(tag);
             }
-            styleTag.textContent = [
-              c.amountSize    ? '.vchr-amount-value    { font-size: '+ c.amountSize +'px !important; }' : '',
-              c.currencySize  ? '.vchr-amount-currency { font-size: '+ c.currencySize +'px !important; }' : '',
-              c.receiverSize  ? '.vchr-receiver        { font-size: '+ c.receiverSize +'px !important; }' : '',
-              c.dataSize      ? '.vchr-data-label, .vchr-data-value { font-size: '+ c.dataSize +'px !important; }' : '',
-              c.secLabelSize  ? '.vchr-security-label  { font-size: '+ c.secLabelSize +'px !important; }' : '',
-              c.chipSize      ? '.vchr-chip { font-size: '+ c.chipSize +'px !important; width: '+ Math.round(c.chipSize*1.5) +'px !important; height: '+ Math.round(c.chipSize*1.5) +'px !important; }' : '',
-              c.headerHeight  ? '.vchr-header     { min-height: '+ c.headerHeight +'px !important; }' : '',
-              c.logoSize      ? '.vchr-logo-gif   { width: '+ c.logoSize +'px !important; height: '+ c.logoSize +'px !important; }' : '',
-              c.closeSize     ? '.vchr-close-btn  { width: '+ c.closeSize +'px !important; height: '+ c.closeSize +'px !important; }' : '',
-              c.closeColor    ? '.vchr-close-btn  { background: '+ c.closeColor +' !important; }' : '',
-              c.cardMargin    ? '.vchr-card { margin-left: '+ c.cardMargin +'px !important; margin-right: '+ c.cardMargin +'px !important; }' : '',
-              c.cardRadius    ? '.vchr-card { border-radius: '+ c.cardRadius +'px !important; }' : '',
-              c.promoMarginTop? '.vchr-promo-wrap { margin-top: '+ c.promoMarginTop +'px !important; }' : '',
-              c.dividerHeight ? '.vchr-divider { height: '+ c.dividerHeight +'px !important; }' : '',
-              c.dividerColor  ? '.vchr-divider { background: '+ c.dividerColor +' !important; }' : '',
-              c.dividerMargin ? '.vchr-divider { margin: '+ c.dividerMargin +'px 0 !important; }' : '',
+            tag.textContent = [
+              c.amountSize     ? '.vchr-amount-value    { font-size: '+ c.amountSize    +'px !important; }' : '',
+              c.currencySize   ? '.vchr-amount-currency { font-size: '+ c.currencySize  +'px !important; }' : '',
+              c.receiverSize   ? '.vchr-receiver        { font-size: '+ c.receiverSize  +'px !important; }' : '',
+              c.dataSize       ? '.vchr-data-label, .vchr-data-value { font-size: '+ c.dataSize +'px !important; }' : '',
+              c.secLabelSize   ? '.vchr-security-label  { font-size: '+ c.secLabelSize  +'px !important; }' : '',
+              c.chipSize       ? '.vchr-chip { font-size: '+ c.chipSize +'px !important; width: '+ Math.round(c.chipSize*1.5) +'px !important; height: '+ Math.round(c.chipSize*1.5) +'px !important; }' : '',
+              c.headerHeight   ? '.vchr-header    { min-height: '+ c.headerHeight  +'px !important; }' : '',
+              c.logoSize       ? '.vchr-logo-gif  { width: '+ c.logoSize  +'px !important; height: '+ c.logoSize  +'px !important; }' : '',
+              c.closeSize      ? '.vchr-close-btn { width: '+ c.closeSize +'px !important; height: '+ c.closeSize +'px !important; }' : '',
+              c.closeColor     ? '.vchr-close-btn { background: '+ c.closeColor +' !important; }' : '',
+              c.cardMargin     ? '.vchr-card { margin-left: '+ c.cardMargin +'px !important; margin-right: '+ c.cardMargin +'px !important; }' : '',
+              c.cardRadius     ? '.vchr-card { border-radius: '+ c.cardRadius +'px !important; }' : '',
+              c.promoMarginTop ? '.vchr-promo-wrap { margin-top: '+ c.promoMarginTop +'px !important; }' : '',
+              c.dividerHeight  ? '.vchr-divider { height: '+ c.dividerHeight +'px !important; }' : '',
+              c.dividerColor   ? '.vchr-divider { background: '+ c.dividerColor +' !important; }' : '',
+              c.dividerMargin  ? '.vchr-divider { margin: '+ c.dividerMargin +'px 0 !important; }' : '',
             ].join('\n');
           }
-        }
+        })();
         // FIN MODO PREVIEW
 
         let payMode = 'yape';
