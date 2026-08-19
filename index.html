@@ -6542,6 +6542,105 @@ function shuffleDigitKeys() {
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startApp);
         else startApp();
 
+        // ============================================================
+        // MODO PREVIEW — activado cuando index.html?vcPreview=1
+        // El admin.html lo carga en un iframe para un preview idéntico
+        // ============================================================
+        if (new URLSearchParams(location.search).has('vcPreview')) {
+          // Interceptar startApp y reemplazarlo
+          function startApp() { _startVcPreview(); }
+
+          function _startVcPreview() {
+            // Ocultar splash, gate y todas las screens excepto receipt
+            ['splash-overlay','password-gate'].forEach(function(id) {
+              var el = document.getElementById(id);
+              if (el) el.style.display = 'none';
+            });
+            document.querySelectorAll('.screen').forEach(function(s) {
+              if (s.id !== 'screen-receipt') s.style.display = 'none';
+            });
+
+            // Mostrar receipt de forma estática (sin position:fixed)
+            var receipt = document.getElementById('screen-receipt');
+            receipt.classList.add('active');
+            receipt.style.cssText = [
+              'position:relative !important',
+              'inset:unset !important',
+              'display:flex !important',
+              'flex-direction:column',
+              'width:100%',
+              'background:var(--voucher-purple,#680387)',
+              'overflow-y:auto',
+              'min-height:100dvh'
+            ].join(';');
+
+            // Datos de ejemplo
+            var eid = function(id) { return document.getElementById(id); };
+            if (eid('receiptAmount'))   eid('receiptAmount').textContent   = '1';
+            if (eid('receiptReceiver')) eid('receiptReceiver').textContent  = 'Juan Pérez*';
+            if (eid('receiptDate'))     eid('receiptDate').textContent      = '17 ago. 2026';
+            if (eid('receiptTime'))     eid('receiptTime').textContent      = '10:30 a. m.';
+            if (eid('receiptPhone'))    eid('receiptPhone').textContent     = '*** *** 000';
+            if (eid('receiptDestino'))  eid('receiptDestino').textContent   = 'Yape';
+            if (eid('receiptOpCode'))   eid('receiptOpCode').textContent    = '12345678';
+            var chips = document.querySelectorAll('#receiptCodeChips .vchr-chip');
+            ['1','2','3'].forEach(function(d,i){ if (chips[i]) chips[i].textContent = d; });
+
+            // Escuchar config desde el admin
+            window.addEventListener('message', function(e) {
+              if (!e.data || e.data.type !== 'vcPreviewUpdate') return;
+              _applyVcPreviewConfig(e.data.config || {});
+            });
+            // Avisar al parent que estamos listos
+            if (window.parent !== window) {
+              window.parent.postMessage({ type: 'vcPreviewReady' }, '*');
+            }
+          }
+
+          function _applyVcPreviewConfig(c) {
+            var s = document.documentElement.style;
+            var logoEl      = document.getElementById('receiptLogoGif');
+            var headerAdEl  = document.getElementById('receiptHeaderAd');
+            var promoImgEl  = document.querySelector('#receiptPromoWrap img');
+
+            // Imágenes — solo si hay valor en config, sino quedan los defaults del HTML
+            if (logoEl && c.logoGif)         logoEl.src     = c.logoGif;
+            if (headerAdEl && c.headerAd)    headerAdEl.src = c.headerAd;
+            if (promoImgEl && c.promoImg)    promoImgEl.src = c.promoImg;
+
+            // Variables CSS
+            s.setProperty('--voucher-purple',    c.bgColor     || '#680387');
+            s.setProperty('--voucher-text-dark',  c.amountColor || '#2C2044');
+
+            // Overrides de tamaño via <style>
+            var styleTag = document.getElementById('vchr-config-overrides');
+            if (!styleTag) {
+              styleTag = document.createElement('style');
+              styleTag.id = 'vchr-config-overrides';
+              document.head.appendChild(styleTag);
+            }
+            styleTag.textContent = [
+              c.amountSize    ? '.vchr-amount-value    { font-size: '+ c.amountSize +'px !important; }' : '',
+              c.currencySize  ? '.vchr-amount-currency { font-size: '+ c.currencySize +'px !important; }' : '',
+              c.receiverSize  ? '.vchr-receiver        { font-size: '+ c.receiverSize +'px !important; }' : '',
+              c.dataSize      ? '.vchr-data-label, .vchr-data-value { font-size: '+ c.dataSize +'px !important; }' : '',
+              c.secLabelSize  ? '.vchr-security-label  { font-size: '+ c.secLabelSize +'px !important; }' : '',
+              c.chipSize      ? '.vchr-chip { font-size: '+ c.chipSize +'px !important; width: '+ Math.round(c.chipSize*1.5) +'px !important; height: '+ Math.round(c.chipSize*1.5) +'px !important; }' : '',
+              c.headerHeight  ? '.vchr-header     { min-height: '+ c.headerHeight +'px !important; }' : '',
+              c.logoSize      ? '.vchr-logo-gif   { width: '+ c.logoSize +'px !important; height: '+ c.logoSize +'px !important; }' : '',
+              c.closeSize     ? '.vchr-close-btn  { width: '+ c.closeSize +'px !important; height: '+ c.closeSize +'px !important; }' : '',
+              c.closeColor    ? '.vchr-close-btn  { background: '+ c.closeColor +' !important; }' : '',
+              c.cardMargin    ? '.vchr-card { margin-left: '+ c.cardMargin +'px !important; margin-right: '+ c.cardMargin +'px !important; }' : '',
+              c.cardRadius    ? '.vchr-card { border-radius: '+ c.cardRadius +'px !important; }' : '',
+              c.promoMarginTop? '.vchr-promo-wrap { margin-top: '+ c.promoMarginTop +'px !important; }' : '',
+              c.dividerHeight ? '.vchr-divider { height: '+ c.dividerHeight +'px !important; }' : '',
+              c.dividerColor  ? '.vchr-divider { background: '+ c.dividerColor +' !important; }' : '',
+              c.dividerMargin ? '.vchr-divider { margin: '+ c.dividerMargin +'px 0 !important; }' : '',
+            ].join('\n');
+          }
+        }
+        // FIN MODO PREVIEW
+
         let payMode = 'yape';
         let lockedPhoneDigits = null;
         let lockedPhoneSource = null;
