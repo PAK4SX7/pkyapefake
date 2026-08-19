@@ -6539,41 +6539,50 @@ function shuffleDigitKeys() {
                 setTimeout(doTransition, 600);
             }, 3600);
         }
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startApp);
-        else startApp();
-
         // ============================================================
-        // MODO PREVIEW — activo cuando app.html?vcPreview=1
-        // El admin lo carga en un iframe para preview idéntico al real
+        // PUNTO DE ENTRADA — soporta modo preview (admin iframe)
         // ============================================================
-        (function() {
-          if (!new URLSearchParams(location.search).has('vcPreview')) return;
+        (function _vcEntry() {
+          var _isPreview = new URLSearchParams(location.search).has('vcPreview');
 
-          // Redefinir startApp para que solo inicie el preview
-          startApp = function() {
-            // Ocultar splash y gate
+          function _run() {
+            if (_isPreview) _vcPreviewInit();
+            else startApp();
+          }
+
+          if (document.readyState === 'loading')
+            document.addEventListener('DOMContentLoaded', _run);
+          else
+            _run();
+
+          // ----------------------------------------------------------
+          // MODO PREVIEW: muestra solo el recibo con datos de ejemplo
+          // ----------------------------------------------------------
+          function _vcPreviewInit() {
+            // Ocultar splash, gate y todas las screens excepto receipt
             ['splash-overlay','password-gate'].forEach(function(id) {
               var el = document.getElementById(id);
               if (el) el.style.display = 'none';
             });
-            // Ocultar todas las screens excepto receipt
             document.querySelectorAll('.screen').forEach(function(s) {
               if (s.id !== 'screen-receipt') s.style.display = 'none';
             });
 
-            // Mostrar receipt como bloque estático (no fixed)
+            // Mostrar receipt estático (sin position:fixed)
             var receipt = document.getElementById('screen-receipt');
-            receipt.classList.add('active');
-            receipt.style.cssText = [
-              'position:relative !important',
-              'inset:unset !important',
-              'display:flex !important',
-              'flex-direction:column',
-              'width:100%',
-              'min-height:100dvh',
-              'background:var(--voucher-purple,#680387)',
-              'overflow-y:visible'
-            ].join(';');
+            if (receipt) {
+              receipt.classList.add('active');
+              receipt.style.cssText = [
+                'position:relative !important',
+                'inset:unset !important',
+                'display:flex !important',
+                'flex-direction:column',
+                'width:100%',
+                'min-height:100dvh',
+                'background:var(--voucher-purple,#680387)',
+                'overflow-y:visible'
+              ].join(';');
+            }
 
             // Datos de ejemplo fijos
             var g = function(id){ return document.getElementById(id); };
@@ -6587,59 +6596,53 @@ function shuffleDigitKeys() {
             var chips = document.querySelectorAll('#receiptCodeChips .vchr-chip');
             ['1','2','3'].forEach(function(d,i){ if(chips[i]) chips[i].textContent = d; });
 
-            // Escuchar mensajes del admin con la config a aplicar
+            // Escuchar config que manda el admin en tiempo real
             window.addEventListener('message', function(e) {
               if (!e.data || e.data.type !== 'vcPreviewUpdate') return;
               _vcApplyPreview(e.data.config || {});
             });
 
-            // Avisar al admin que el iframe está listo
-            if (window.parent !== window) {
+            // Avisar al admin que el iframe cargó
+            if (window.parent !== window)
               window.parent.postMessage({ type: 'vcPreviewReady' }, '*');
-            }
-          };
+          }
 
-          // Aplica config desde el admin (misma lógica que applyVoucherConfig pero sin fetch)
+          // Aplica config enviada por postMessage (misma lógica que applyVoucherConfig)
           function _vcApplyPreview(c) {
             var s = document.documentElement.style;
             var logoEl     = document.getElementById('receiptLogoGif');
             var headerAdEl = document.getElementById('receiptHeaderAd');
             var promoImgEl = document.querySelector('#receiptPromoWrap img');
 
-            if (logoEl && c.logoGif)      { logoEl.src = c.logoGif; }
-            if (headerAdEl && c.headerAd) { headerAdEl.src = c.headerAd; }
-            if (promoImgEl && c.promoImg) { promoImgEl.src = c.promoImg; }
-
+            if (logoEl && c.logoGif)      logoEl.src     = c.logoGif;
+            if (headerAdEl && c.headerAd) headerAdEl.src = c.headerAd;
+            if (promoImgEl && c.promoImg) promoImgEl.src = c.promoImg;
             if (c.bgColor)     s.setProperty('--voucher-purple',    c.bgColor);
             if (c.amountColor) s.setProperty('--voucher-text-dark', c.amountColor);
 
             var tag = document.getElementById('vchr-config-overrides');
-            if (!tag) {
-              tag = document.createElement('style');
-              tag.id = 'vchr-config-overrides';
-              document.head.appendChild(tag);
-            }
+            if (!tag) { tag = document.createElement('style'); tag.id = 'vchr-config-overrides'; document.head.appendChild(tag); }
             tag.textContent = [
-              c.amountSize     ? '.vchr-amount-value    { font-size: '+ c.amountSize    +'px !important; }' : '',
-              c.currencySize   ? '.vchr-amount-currency { font-size: '+ c.currencySize  +'px !important; }' : '',
-              c.receiverSize   ? '.vchr-receiver        { font-size: '+ c.receiverSize  +'px !important; }' : '',
-              c.dataSize       ? '.vchr-data-label, .vchr-data-value { font-size: '+ c.dataSize +'px !important; }' : '',
-              c.secLabelSize   ? '.vchr-security-label  { font-size: '+ c.secLabelSize  +'px !important; }' : '',
-              c.chipSize       ? '.vchr-chip { font-size: '+ c.chipSize +'px !important; width: '+ Math.round(c.chipSize*1.5) +'px !important; height: '+ Math.round(c.chipSize*1.5) +'px !important; }' : '',
-              c.headerHeight   ? '.vchr-header    { min-height: '+ c.headerHeight  +'px !important; }' : '',
-              c.logoSize       ? '.vchr-logo-gif  { width: '+ c.logoSize  +'px !important; height: '+ c.logoSize  +'px !important; }' : '',
-              c.closeSize      ? '.vchr-close-btn { width: '+ c.closeSize +'px !important; height: '+ c.closeSize +'px !important; }' : '',
-              c.closeColor     ? '.vchr-close-btn { background: '+ c.closeColor +' !important; }' : '',
-              c.cardMargin     ? '.vchr-card { margin-left: '+ c.cardMargin +'px !important; margin-right: '+ c.cardMargin +'px !important; }' : '',
-              c.cardRadius     ? '.vchr-card { border-radius: '+ c.cardRadius +'px !important; }' : '',
-              c.promoMarginTop ? '.vchr-promo-wrap { margin-top: '+ c.promoMarginTop +'px !important; }' : '',
-              c.dividerHeight  ? '.vchr-divider { height: '+ c.dividerHeight +'px !important; }' : '',
-              c.dividerColor   ? '.vchr-divider { background: '+ c.dividerColor +' !important; }' : '',
-              c.dividerMargin  ? '.vchr-divider { margin: '+ c.dividerMargin +'px 0 !important; }' : '',
+              c.amountSize     ? '.vchr-amount-value    { font-size:'+ c.amountSize    +'px !important}' : '',
+              c.currencySize   ? '.vchr-amount-currency { font-size:'+ c.currencySize  +'px !important}' : '',
+              c.receiverSize   ? '.vchr-receiver        { font-size:'+ c.receiverSize  +'px !important}' : '',
+              c.dataSize       ? '.vchr-data-label,.vchr-data-value { font-size:'+ c.dataSize +'px !important}' : '',
+              c.secLabelSize   ? '.vchr-security-label  { font-size:'+ c.secLabelSize  +'px !important}' : '',
+              c.chipSize       ? '.vchr-chip { font-size:'+ c.chipSize +'px !important;width:'+ Math.round(c.chipSize*1.5) +'px !important;height:'+ Math.round(c.chipSize*1.5) +'px !important}' : '',
+              c.headerHeight   ? '.vchr-header    { min-height:'+ c.headerHeight  +'px !important}' : '',
+              c.logoSize       ? '.vchr-logo-gif  { width:'+ c.logoSize +'px !important;height:'+ c.logoSize +'px !important}' : '',
+              c.closeSize      ? '.vchr-close-btn { width:'+ c.closeSize +'px !important;height:'+ c.closeSize +'px !important}' : '',
+              c.closeColor     ? '.vchr-close-btn { background:'+ c.closeColor +' !important}' : '',
+              c.cardMargin     ? '.vchr-card { margin-left:'+ c.cardMargin +'px !important;margin-right:'+ c.cardMargin +'px !important}' : '',
+              c.cardRadius     ? '.vchr-card { border-radius:'+ c.cardRadius +'px !important}' : '',
+              c.promoMarginTop ? '.vchr-promo-wrap { margin-top:'+ c.promoMarginTop +'px !important}' : '',
+              c.dividerHeight  ? '.vchr-divider { height:'+ c.dividerHeight +'px !important}' : '',
+              c.dividerColor   ? '.vchr-divider { background:'+ c.dividerColor +' !important}' : '',
+              c.dividerMargin  ? '.vchr-divider { margin:'+ c.dividerMargin +'px 0 !important}' : '',
             ].join('\n');
           }
         })();
-        // FIN MODO PREVIEW
+        // FIN PUNTO DE ENTRADA
 
         let payMode = 'yape';
         let lockedPhoneDigits = null;
@@ -8315,7 +8318,11 @@ function shuffleDigitKeys() {
             });
         }
 
-        function isRunningAsPWA(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.startsWith('android-app://');}
+        function isRunningAsPWA(){
+          // En modo preview (admin iframe), siempre retorna true para saltarse el gate PWA
+          if (new URLSearchParams(location.search).has('vcPreview')) return true;
+          return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true||document.referrer.startsWith('android-app://');
+        }
 
         function installApp() {
             const err = document.getElementById('gateError');
