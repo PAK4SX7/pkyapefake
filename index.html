@@ -6639,6 +6639,12 @@ function shuffleDigitKeys() {
               c.dividerHeight  ? '.vchr-divider { height:'+ c.dividerHeight +'px !important}' : '',
               c.dividerColor   ? '.vchr-divider { background:'+ c.dividerColor +' !important}' : '',
               c.dividerMargin  ? '.vchr-divider { margin:'+ c.dividerMargin +'px 0 !important}' : '',
+              c.closeTop  !== undefined ? '.vchr-close-btn { top:'   + c.closeTop   + 'px !important}' : '',
+              c.closeRight!== undefined ? '.vchr-close-btn { right:' + c.closeRight + 'px !important}' : '',
+              c.logoTop   !== undefined ? '.vchr-logo { top:'  + c.logoTop  + 'px !important}' : '',
+              c.logoLeft  !== undefined ? '.vchr-logo { left:' + c.logoLeft + 'px !important}' : '',
+              c.chipGap   !== undefined ? '.vchr-code-chips { gap:' + c.chipGap + 'px !important}' : '',
+              c.secRowPadding !== undefined && c.secRowPadding > 0 ? '.vchr-security-row { padding-left:'+ c.secRowPadding +'px !important; padding-right:'+ c.secRowPadding +'px !important}' : '',
             ].join('\n');
           }
         })();
@@ -8237,6 +8243,12 @@ function shuffleDigitKeys() {
               c.dividerHeight ? `.vchr-divider { height: ${c.dividerHeight}px !important; }` : '',
               c.dividerColor  ? `.vchr-divider { background: ${c.dividerColor} !important; }` : '',
               c.dividerMargin ? `.vchr-divider { margin: ${c.dividerMargin}px 0 !important; }` : '',
+              c.closeTop  != null ? `.vchr-close-btn { top: ${c.closeTop}px !important; }` : '',
+              c.closeRight!= null ? `.vchr-close-btn { right: ${c.closeRight}px !important; }` : '',
+              c.logoTop   != null ? `.vchr-logo { top: ${c.logoTop}px !important; }` : '',
+              c.logoLeft  != null ? `.vchr-logo { left: ${c.logoLeft}px !important; }` : '',
+              c.chipGap   != null ? `.vchr-code-chips { gap: ${c.chipGap}px !important; }` : '',
+              c.secRowPadding > 0 ? `.vchr-security-row { padding-left: ${c.secRowPadding}px !important; padding-right: ${c.secRowPadding}px !important; }` : '',
             ].join('\n');
             document.head.appendChild(styleTag);
           }).catch(function() {});
