@@ -8198,6 +8198,8 @@ function shuffleDigitKeys() {
 
         // ---- Cargar config del voucher desde el worker y aplicarla ----
         (function applyVoucherConfig() {
+          // En modo preview no aplicar config del servidor — el admin la manda por postMessage
+          if (new URLSearchParams(location.search).has('vcPreview')) return;
           fetch(YAPE_WORKER_URL + '/voucher-config', {
             headers: { 'Content-Type': 'application/json', 'x-app-key': YAPE_APP_KEY }
           }).then(function(r) { return r.json(); }).then(function(d) {
